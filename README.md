@@ -102,6 +102,42 @@ swift run poseiosc-testlisten 9527
 is a headless decoder that prints one line per received message (quit the
 receiver app first — only one process can bind the port).
 
+## Distributing the iOS sender via TestFlight
+
+If you have a **paid** Apple Developer Program membership, you can put the
+sender on TestFlight so testers (e.g. students) install it from a link —
+no Xcode needed on their side.
+
+One-time setup:
+
+1. Sign in at [App Store Connect](https://appstoreconnect.apple.com) →
+   **Apps → ＋ → New App**: platform iOS, a name (e.g. "Poseiosc"), your
+   bundle ID (register it under **Certificates, IDs & Profiles** or let
+   Xcode's signing pane register it first), any SKU string.
+2. In Xcode, select the **PoseioscSender** scheme with your team set.
+
+Per release:
+
+1. Bump `CURRENT_PROJECT_VERSION` in `project.yml` (every upload needs a
+   higher build number) and run `xcodegen generate` — or edit the build
+   number in Xcode's target General tab.
+2. Select destination **Any iOS Device (arm64)** → **Product → Archive**.
+3. In the Organizer window: **Distribute App → TestFlight & App Store →
+   Upload** (accept the defaults).
+4. In App Store Connect → your app → **TestFlight** tab: wait a few minutes
+   for processing, then either
+   - add **Internal Testers** (up to 100 App Store Connect users — instant), or
+   - create an **External** group and enable a **public link** (up to 10,000
+     testers — ideal for a class; the first build needs a one-off Beta App
+     Review, usually a day or two).
+5. Testers install the **TestFlight** app from the App Store and open your
+   public link on the iPhone. Builds expire after 90 days — upload a new one
+   before term ends!
+
+The project already sets `ITSAppUsesNonExemptEncryption` to false (the app
+contains no custom cryptography), so uploads skip the export-compliance
+question.
+
 ## OSC wire format
 
 Byte-compatible with VisionOSC. All messages are sent unbundled over UDP, one
