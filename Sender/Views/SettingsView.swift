@@ -100,7 +100,8 @@ struct SettingsView: View {
     private func select(_ receiver: DiscoveredReceiver) {
         resolvingReceiver = receiver.name
         resolveFailed = false
-        model.bonjour.resolve(receiver) { result in
+        Task {
+            let result = await model.bonjour.resolve(receiver)
             resolvingReceiver = nil
             guard let result else {
                 resolveFailed = true

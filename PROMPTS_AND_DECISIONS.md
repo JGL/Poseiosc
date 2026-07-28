@@ -148,6 +148,29 @@ the leading slash on addresses; the code is authoritative).
 - Frames older than 0.5 s are dropped from the canvas (sender stopped or
   detector toggled off).
 
+## Networking fixes from on-device testing (2026-07-28)
+
+- Bonjour tap-to-select reported "could not resolve" even though the
+  advertisement was correct (`dns-sd -L` showed `MB-C4654-2.local.:9527`).
+  Two bugs in the sender's resolver: (1) after a successful resolve it
+  cancelled the throwaway connection, and the resulting `.cancelled` state
+  fired the completion a second time with `nil`, surfacing the error UI;
+  (2) no result pinning to IPv4 — the receiver's OSC server binds IPv4-only
+  (SwiftOSC default), so an IPv6/link-local resolution would silently fail.
+  Rewritten as a one-shot async resolve with a 4-second timeout and forced
+  IPv4.
+
+## App icons (2026-07-28)
+
+- Both icons show a waving pose-skeleton (green joints/limbs, echoing the
+  overlay colors) emitting cyan signal arcs from the raised hand — pose
+  tracking + OSC broadcast in one image. iOS gets the full-bleed square;
+  macOS gets the same art inside the traditional margin + squircle + shadow.
+- Icons are rendered programmatically with CoreGraphics —
+  `Design/render_icons.swift` regenerates both 1024px masters
+  (`swift Design/render_icons.swift <outputDir>`), and `sips` downscales the
+  macOS size set. No binary-only design sources.
+
 ## Verification record (2026-07-28)
 
 - `swift test` in `PoseioscShared`: 18 tests green, including round-trips for

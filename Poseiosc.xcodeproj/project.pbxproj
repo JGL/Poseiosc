@@ -21,6 +21,7 @@
 		6FF0C525252CE97526053799 /* ReceiverModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAD896DA7A3B37A6A31A3B93 /* ReceiverModel.swift */; };
 		7124FC5DD6416D979A9CB3A5 /* VisualizerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E80DC3CA255FCB01ED48A2A /* VisualizerView.swift */; };
 		80AB005F908B39DAACA16DAD /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB2579131864E3D94AE9B1 /* AppModel.swift */; };
+		8AFCF5D8F4EEB30C214E2FF1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0851D9770115BCB066F17FC1 /* Assets.xcassets */; };
 		8CE074223F9D626F9545DEE7 /* PoseioscSenderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF54E13A2A7AB35B56438B53 /* PoseioscSenderApp.swift */; };
 		8E2960ABCF02F45868B6FEED /* OSCSenderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C79D48445FD556B7E157A655 /* OSCSenderService.swift */; };
 		9E0901C5260DEEB35CEEB8C8 /* SwiftOSC in Frameworks */ = {isa = PBXBuildFile; productRef = 366E72A24DDEC84E31BF9590 /* SwiftOSC */; };
@@ -34,17 +35,19 @@
 		C1FA3376301748CDF2EBA491 /* BonjourBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD32234237CCF1DF3E4DC10D /* BonjourBrowser.swift */; };
 		DFC0EE70F29CB7637D458078 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAE66E4A17EB7C970B3AAE4 /* VisionProcessor.swift */; };
 		E0A698EC29ACC9B0F2ABBA9C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435A813DE09BC11B41C32425 /* ContentView.swift */; };
+		E266BFE0C3DEB65C8F344055 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 609058B4E0A8B1D8D98A09E5 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		027F48AC580CFF2361DED0EB /* ReceiverService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiverService.swift; sourceTree = "<group>"; };
 		051C58064F9637D16A9AA27E /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		08377784C32E0DF2CD1D6385 /* PoseioscReceiver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PoseioscReceiver.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0851D9770115BCB066F17FC1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0C94CD90D3A5A05E1701624E /* PoseioscReceiverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseioscReceiverApp.swift; sourceTree = "<group>"; };
 		18D72A7101CBA6994AA2E15C /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		1EB5DF97E9A2190C8788B0AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2DE9C56851F895F32C7EDE92 /* PoseioscReceiver.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PoseioscReceiver.entitlements; sourceTree = "<group>"; };
-		3AA33FAC53AB7B318EEEB5A8 /* PoseioscShared */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PoseioscShared; sourceTree = SOURCE_ROOT; };
+		3AA33FAC53AB7B318EEEB5A8 /* PoseioscShared */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PoseioscShared; path = PoseioscShared; sourceTree = SOURCE_ROOT; };
 		435A813DE09BC11B41C32425 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4BAE66E4A17EB7C970B3AAE4 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
 		4C5DDFD8A815238592064481 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
@@ -52,13 +55,14 @@
 		4E80DC3CA255FCB01ED48A2A /* VisualizerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizerView.swift; sourceTree = "<group>"; };
 		58ADC8773ECC0906EECF2330 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		5F5173AE287A7C3AD17A08D4 /* FrameConveyor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameConveyor.swift; sourceTree = "<group>"; };
+		609058B4E0A8B1D8D98A09E5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		72C46715552933D1B46ACDDB /* ObservationMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationMapping.swift; sourceTree = "<group>"; };
 		7DC6CF5A2755533C8A5EE9E2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ABD5B4A62EF924964EBB0352 /* BonjourAdvertiser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourAdvertiser.swift; sourceTree = "<group>"; };
 		AD32234237CCF1DF3E4DC10D /* BonjourBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourBrowser.swift; sourceTree = "<group>"; };
 		B5FB2579131864E3D94AE9B1 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		BC7BCDE43645D8FC61F8EE31 /* ControlBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBarView.swift; sourceTree = "<group>"; };
-		C7974AF4ADDE59A408B7832D /* PoseioscSender.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PoseioscSender.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7974AF4ADDE59A408B7832D /* PoseioscSender.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PoseioscSender.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C79D48445FD556B7E157A655 /* OSCSenderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSCSenderService.swift; sourceTree = "<group>"; };
 		C8954ECD2A436996A593F3D9 /* FrameKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameKind.swift; sourceTree = "<group>"; };
 		CF54E13A2A7AB35B56438B53 /* PoseioscSenderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseioscSenderApp.swift; sourceTree = "<group>"; };
@@ -134,6 +138,7 @@
 			isa = PBXGroup;
 			children = (
 				B5FB2579131864E3D94AE9B1 /* AppModel.swift */,
+				0851D9770115BCB066F17FC1 /* Assets.xcassets */,
 				AD32234237CCF1DF3E4DC10D /* BonjourBrowser.swift */,
 				58ADC8773ECC0906EECF2330 /* CameraManager.swift */,
 				5F5173AE287A7C3AD17A08D4 /* FrameConveyor.swift */,
@@ -161,6 +166,7 @@
 		D79E8A7272D10674B1B5056E /* Receiver */ = {
 			isa = PBXGroup;
 			children = (
+				609058B4E0A8B1D8D98A09E5 /* Assets.xcassets */,
 				ABD5B4A62EF924964EBB0352 /* BonjourAdvertiser.swift */,
 				C8954ECD2A436996A593F3D9 /* FrameKind.swift */,
 				7DC6CF5A2755533C8A5EE9E2 /* Info.plist */,
@@ -181,6 +187,7 @@
 			buildConfigurationList = 7587B5CA88C881C4864154E5 /* Build configuration list for PBXNativeTarget "PoseioscSender" */;
 			buildPhases = (
 				70735B47568236CADDF5D17E /* Sources */,
+				C6EDC8CB1617405FF7304CA0 /* Resources */,
 				234C82DA9BF2F392678F7D9E /* Frameworks */,
 			);
 			buildRules = (
@@ -201,6 +208,7 @@
 			buildConfigurationList = 9283F2379DB4B3D069BD1C7E /* Build configuration list for PBXNativeTarget "PoseioscReceiver" */;
 			buildPhases = (
 				89E000938346642A0189DEBE /* Sources */,
+				20F0B635D290D467C7B46382 /* Resources */,
 				5D2B6D7523315F6AA83C6111 /* Frameworks */,
 			);
 			buildRules = (
@@ -226,6 +234,7 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					16A518979B61401034F44EE7 = {
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					D536D3EEA62BF5D5B9037B4C = {
@@ -257,6 +266,25 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		20F0B635D290D467C7B46382 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E266BFE0C3DEB65C8F344055 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C6EDC8CB1617405FF7304CA0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8AFCF5D8F4EEB30C214E2FF1 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		70735B47568236CADDF5D17E /* Sources */ = {
@@ -320,7 +348,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = QM86JXKQ8W;
 				INFOPLIST_FILE = Sender/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -419,7 +446,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = QM86JXKQ8W;
 				INFOPLIST_FILE = Sender/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
