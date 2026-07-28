@@ -1,0 +1,88 @@
+# Poseiosc — XcodeGen project spec (source of truth for Poseiosc.xcodeproj).
+#
+# The generated Poseiosc.xcodeproj is committed so end users only need Xcode.
+# After adding/removing source files, regenerate with:
+#   xcodegen generate
+
+name: Poseiosc
+options:
+  bundleIdPrefix: com.poseiosc
+  deploymentTarget:
+    iOS: "18.0"
+    macOS: "15.0"
+  createIntermediateGroups: true
+
+packages:
+  swift-osc:
+    url: https://github.com/orchetect/swift-osc
+    from: 3.1.0
+  PoseioscShared:
+    path: PoseioscShared
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    # Users select their own team in Xcode → Signing & Capabilities.
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ""
+
+targets:
+  PoseioscSender:
+    type: application
+    platform: iOS
+    sources: [Sender]
+    dependencies:
+      - package: swift-osc
+        product: SwiftOSC
+      - package: PoseioscShared
+        product: PoseioscShared
+    info:
+      path: Sender/Info.plist
+      properties:
+        CFBundleDisplayName: Poseiosc
+        NSCameraUsageDescription: "Camera frames are analyzed on-device to detect bodies, hands, faces, text, and animals. No video leaves the phone — only OSC tracking data."
+        NSLocalNetworkUsageDescription: "Poseiosc sends OSC tracking data to receivers on your local network and browses for them via Bonjour."
+        NSBonjourServices: ["_osc._udp"]
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIRequiresFullScreen: true
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+
+  PoseioscReceiver:
+    type: application
+    platform: macOS
+    sources: [Receiver]
+    dependencies:
+      - package: swift-osc
+        product: SwiftOSC
+      - package: PoseioscShared
+        product: PoseioscShared
+    info:
+      path: Receiver/Info.plist
+      properties:
+        CFBundleDisplayName: Poseiosc Receiver
+        NSLocalNetworkUsageDescription: "Poseiosc Receiver listens for OSC tracking data and advertises itself on your local network via Bonjour."
+        NSBonjourServices: ["_osc._udp"]
+    entitlements:
+      path: Receiver/PoseioscReceiver.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.server: true
+        com.apple.security.network.client: true
+
+schemes:
+  PoseioscSender:
+    build:
+      targets:
+        PoseioscSender: all
+    run:
+      config: Debug
+  PoseioscReceiver:
+    build:
+      targets:
+        PoseioscReceiver: all
+    run:
+      config: Debug

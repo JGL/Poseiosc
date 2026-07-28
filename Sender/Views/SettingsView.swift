@@ -1,0 +1,116 @@
+//
+//  SettingsView.swift
+//  Poseiosc Sender (iOS)
+//
+//  Destination configuration: Bonjour-discovered receivers plus manual entry.
+//
+
+import SwiftUI
+
+struct SettingsView: View {
+    @Bindable var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var hostText = ""
+    @State private var portText = ""
+    @State private var resolvingReceiver: String?
+    @State private var resolveFailed = false
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Discovered receivers") {
+                    if model.bonjour.receivers.isEmpty {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("Searching for receivers on this network…")
+                                .foregroundStyle(.secondary)
+                        }
+                        .font(.footnote)
+                    }
+                    ForEach(model.bonjour.receivers) { receiver in
+                        Button {
+                            select(receiver)
+                        } label: {
+                            HStack {
+                                Label(receiver.name, systemImage: "dot.radiowaves.left.and.right")
+                                Spacer()
+                                if resolvingReceiver == receiver.name {
+                                    ProgressView()
+                                }
+                            }
+                        }
+                        .foregroundStyle(.primary)
+                    }
+                    if resolveFailed {
+                        Text("Could not resolve that receiver — enter its address manually below.")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                Section("Destination") {
+                    TextField("Host or IP (e.g. 192.168.1.20)", text: $hostText)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.URL)
+                    TextField("Port", text: $portText)
+                        .keyboardType(.numberPad)
+                    Button("Apply") {
+                        applyDestination()
+                    }
+                }
+
+                Section("Statistics") {
+                    LabeledContent("Messages sent", value: "\(model.sentCount)")
+                    LabeledContent("Processed", value: "\(Int(model.processedFPS)) fps")
+                }
+
+                Section {
+                    Text("Default port 9527 matches VisionOSC. The macOS Poseiosc Receiver listens on that port; other OSC tools (TouchDesigner, Max/MSP, Processing) can receive on any port you set here.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        applyDestination()
+                        dismiss()
+                    }
+                }
+            }
+            .onAppear {
+                hostText = model.settings.host
+                portText = String(model.settings.port)
+            }
+        }
+    }
+
+    private func select(_ receiver: DiscoveredReceiver) {
+        resolvingReceiver = receiver.name
+        resolveFailed = false
+        model.bonjour.resolve(receiver) { result in
+            resolvingReceiver = nil
+            guard let result else {
+                resolveFailed = true
+                return
+            }
+            hostText = result.host
+            portText = String(result.port)
+            applyDestination()
+        }
+    }
+
+    private func applyDestination() {
+        model.settings.host = hostText.trimmingCharacters(in: .whitespaces)
+        if let port = UInt16(portText), port > 0 {
+            model.settings.port = port
+        } else {
+            portText = String(model.settings.port)
+        }
+        model.applySettings()
+    }
+}
