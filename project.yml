@@ -6,7 +6,7 @@
 
 name: Poseiosc
 options:
-  bundleIdPrefix: com.poseiosc
+  bundleIdPrefix: com.joelgethinlewis
   deploymentTarget:
     iOS: "18.0"
     macOS: "15.0"

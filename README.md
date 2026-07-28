@@ -53,10 +53,12 @@ it's advertising. You can change the port and press **Restart**.
 1. In the same project, select the **PoseioscSender** scheme and your iPhone
    as the destination (connect it by cable the first time).
 2. In the **PoseioscSender** target's **Signing & Capabilities** tab, select
-   your team. If the bundle identifier collides with someone else's, change
-   `com.poseiosc` to something of your own (e.g. `com.yourname.poseiosc`) —
-   with XcodeGen installed you can instead edit `bundleIdPrefix` in
-   `project.yml` and run `xcodegen generate`.
+   your team. If you're building from source (rather than installing via
+   TestFlight), also change the bundle identifier prefix
+   `com.joelgethinlewis` to something of your own (e.g.
+   `com.yourname.poseiosc`) — either in Signing & Capabilities, or by
+   editing `bundleIdPrefix` in `project.yml` and running
+   `xcodegen generate`.
 3. Run (⌘R). With a free developer account the app must be re-signed every
    7 days; paid accounts get a year.
 4. On the iPhone, if the app won't launch: **Settings → General →
