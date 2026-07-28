@@ -78,6 +78,10 @@ it's advertising. You can change the port and press **Restart**.
 4. Toggle detectors with the chips along the bottom (Body / Hand / Face /
    Text / Animal). More detectors = lower frame rate; body+hand+face is the
    comfortable default. The status capsule shows destination and processed fps.
+5. In selfie mode the phone screen shows a mirror image (like the Camera app)
+   so it feels natural — but the OSC coordinates sent to receivers are
+   **always unmirrored**, matching VisionOSC. Turn the mirror off in
+   Settings → Preview if you want the screen to match the receiver exactly.
 
 ### Testing without an iPhone
 

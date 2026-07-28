@@ -12,6 +12,7 @@ import PoseioscShared
 
 struct OverlayView: View {
     let snapshot: OverlaySnapshot
+    var mirrored = false
 
     var body: some View {
         Canvas { context, size in
@@ -24,14 +25,20 @@ struct OverlayView: View {
             let offsetX = (size.width - frameW * scale) / 2
             let offsetY = (size.height - frameH * scale) / 2
 
+            // In selfie-mirror mode, flip x here (rather than transforming the
+            // canvas) so drawn label text stays readable.
             func map(_ p: WirePoint) -> CGPoint {
-                CGPoint(x: offsetX + CGFloat(p.x) * scale, y: offsetY + CGFloat(p.y) * scale)
+                let x = offsetX + CGFloat(p.x) * scale
+                return CGPoint(x: mirrored ? size.width - x : x, y: offsetY + CGFloat(p.y) * scale)
             }
             func map(_ r: WireRect) -> CGRect {
-                CGRect(
-                    x: offsetX + CGFloat(r.left) * scale,
+                var x = offsetX + CGFloat(r.left) * scale
+                let width = CGFloat(r.width) * scale
+                if mirrored { x = size.width - x - width }
+                return CGRect(
+                    x: x,
                     y: offsetY + CGFloat(r.top) * scale,
-                    width: CGFloat(r.width) * scale,
+                    width: width,
                     height: CGFloat(r.height) * scale
                 )
             }

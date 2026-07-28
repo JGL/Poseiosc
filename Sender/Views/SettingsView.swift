@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var resolveFailed = false
 
     var body: some View {
+        @Bindable var settings = model.settings
         NavigationStack {
             Form {
                 Section("Discovered receivers") {
@@ -59,6 +60,13 @@ struct SettingsView: View {
                     Button("Apply") {
                         applyDestination()
                     }
+                }
+
+                Section("Preview") {
+                    Toggle("Mirror selfie preview", isOn: $settings.mirrorFrontPreview)
+                    Text("Front camera only. Display-only — the OSC coordinates sent to receivers are always unmirrored.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
 
                 Section("Statistics") {

@@ -99,11 +99,18 @@ the leading slash on addresses; the code is authoritative).
 
 - `AVCaptureVideoDataOutput` at 720p, `alwaysDiscardsLateVideoFrames`, buffers
   delivered sensor-native (no pixel rotation). Vision is told the buffer
-  orientation instead: back camera `.right`, front camera `.left` in the
-  portrait-locked UI. Transmitted frame dimensions are the *oriented* dims
-  (e.g. 720×1280). ⚠️ To be verified on-device with the overlay as ground
-  truth; if the overlay is rotated/flipped, adjust
-  `CameraManager.visionOrientation`.
+  orientation instead: `.right` for **both** cameras in the portrait-locked
+  UI. (Initially the front camera was assumed to need `.left`; on-device
+  testing 2026-07-28 showed all front-camera detections rotated 180°, so both
+  sensors are mounted identically and `.right` is correct everywhere.)
+  Transmitted frame dimensions are the *oriented* dims (e.g. 720×1280).
+- The sender defaults to the **front (selfie) camera** on first launch —
+  pointing the phone at yourself is the natural first test.
+- **Selfie-mirror option** (user request after on-device testing, default ON):
+  in front-camera mode the preview is flipped with a display transform and the
+  overlay flips its own x-coordinates (keeping label text readable), so the
+  screen feels like a mirror. Strictly display-only — OSC output remains
+  unmirrored regardless of the toggle (Settings → Preview).
 - **Frame policy: latest-frame-wins.** One Vision batch in flight; newer
   frames overwrite a single pending slot (`FrameConveyor`). Latency stays
   bounded when all five detectors run.
@@ -113,7 +120,12 @@ the leading slash on addresses; the code is authoritative).
 - **Front camera preview and data are unmirrored** (preview mirroring
   disabled) so preview, overlay, and OSC coordinates all agree with
   VisionOSC's unmirrored convention. The selfie preview therefore looks
-  "un-selfie-like" — deliberate.
+  "un-selfie-like" — deliberate. Implementation note (found on device
+  2026-07-28): the preview layer's connection doesn't exist until the session
+  has inputs and is recreated — with mirroring re-enabled by default — on
+  every camera switch, so disabling mirroring from the SwiftUI view was
+  ineffective. `CameraManager` owns the preview layer and re-disables
+  mirroring inside every session reconfiguration instead.
 - **Text recognition uses `.fast`** level, prioritizing frame rate, matching
   VisionOSC's philosophy (its text detector ran ~10 fps).
 - The new Vision API has **no constellation setting** for face landmarks

@@ -2,40 +2,45 @@
 //  CameraPreviewView.swift
 //  Poseiosc Sender (iOS)
 //
-//  Hosts the AVCaptureVideoPreviewLayer. Mirroring is disabled even for the
-//  front camera so the preview matches the unmirrored coordinates sent over OSC.
+//  Hosts the CameraManager's AVCaptureVideoPreviewLayer. The layer (and its
+//  unmirrored configuration) is owned by CameraManager — see the note there
+//  about why mirroring cannot be configured from this view.
 //
 
 import SwiftUI
 import AVFoundation
 
 struct CameraPreviewView: UIViewRepresentable {
-    let session: AVCaptureSession
+    let previewLayer: AVCaptureVideoPreviewLayer
 
-    final class PreviewView: UIView {
-        override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
+    final class PreviewContainerView: UIView {
+        var previewLayer: AVCaptureVideoPreviewLayer? {
+            didSet {
+                guard previewLayer !== oldValue else { return }
+                oldValue?.removeFromSuperlayer()
+                if let previewLayer {
+                    layer.addSublayer(previewLayer)
+                    setNeedsLayout()
+                }
+            }
+        }
 
-        var previewLayer: AVCaptureVideoPreviewLayer {
-            layer as! AVCaptureVideoPreviewLayer
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            previewLayer?.frame = bounds
+            CATransaction.commit()
         }
     }
 
-    func makeUIView(context: Context) -> PreviewView {
-        let view = PreviewView()
-        view.previewLayer.session = session
-        view.previewLayer.videoGravity = .resizeAspectFill
-        disableMirroring(view.previewLayer)
+    func makeUIView(context: Context) -> PreviewContainerView {
+        let view = PreviewContainerView()
+        view.previewLayer = previewLayer
         return view
     }
 
-    func updateUIView(_ uiView: PreviewView, context: Context) {
-        disableMirroring(uiView.previewLayer)
-    }
-
-    private func disableMirroring(_ layer: AVCaptureVideoPreviewLayer) {
-        if let connection = layer.connection, connection.isVideoMirroringSupported {
-            connection.automaticallyAdjustsVideoMirroring = false
-            connection.isVideoMirrored = false
-        }
+    func updateUIView(_ uiView: PreviewContainerView, context: Context) {
+        uiView.previewLayer = previewLayer
     }
 }

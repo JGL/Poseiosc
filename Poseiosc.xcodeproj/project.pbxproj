@@ -44,7 +44,7 @@
 		18D72A7101CBA6994AA2E15C /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		1EB5DF97E9A2190C8788B0AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2DE9C56851F895F32C7EDE92 /* PoseioscReceiver.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PoseioscReceiver.entitlements; sourceTree = "<group>"; };
-		3AA33FAC53AB7B318EEEB5A8 /* PoseioscShared */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PoseioscShared; path = PoseioscShared; sourceTree = SOURCE_ROOT; };
+		3AA33FAC53AB7B318EEEB5A8 /* PoseioscShared */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PoseioscShared; sourceTree = SOURCE_ROOT; };
 		435A813DE09BC11B41C32425 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4BAE66E4A17EB7C970B3AAE4 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
 		4C5DDFD8A815238592064481 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
@@ -58,7 +58,7 @@
 		AD32234237CCF1DF3E4DC10D /* BonjourBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourBrowser.swift; sourceTree = "<group>"; };
 		B5FB2579131864E3D94AE9B1 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		BC7BCDE43645D8FC61F8EE31 /* ControlBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBarView.swift; sourceTree = "<group>"; };
-		C7974AF4ADDE59A408B7832D /* PoseioscSender.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PoseioscSender.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7974AF4ADDE59A408B7832D /* PoseioscSender.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PoseioscSender.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C79D48445FD556B7E157A655 /* OSCSenderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSCSenderService.swift; sourceTree = "<group>"; };
 		C8954ECD2A436996A593F3D9 /* FrameKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameKind.swift; sourceTree = "<group>"; };
 		CF54E13A2A7AB35B56438B53 /* PoseioscSenderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseioscSenderApp.swift; sourceTree = "<group>"; };
@@ -226,7 +226,6 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					16A518979B61401034F44EE7 = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					D536D3EEA62BF5D5B9037B4C = {
@@ -321,6 +320,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = QM86JXKQ8W;
 				INFOPLIST_FILE = Sender/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -419,6 +419,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = QM86JXKQ8W;
 				INFOPLIST_FILE = Sender/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -21,6 +21,10 @@ final class SettingsStore {
 
     var useFrontCamera: Bool { didSet { defaults.set(useFrontCamera, forKey: "useFrontCamera") } }
 
+    /// Mirrors the on-screen preview and overlay in selfie mode so it feels
+    /// like a mirror. Display-only: OSC coordinates are always unmirrored.
+    var mirrorFrontPreview: Bool { didSet { defaults.set(mirrorFrontPreview, forKey: "mirrorFrontPreview") } }
+
     private let defaults = UserDefaults.standard
 
     init() {
@@ -37,7 +41,8 @@ final class SettingsStore {
         detectFaces = bool("detectFaces", default: true)
         detectTexts = bool("detectTexts", default: false)
         detectAnimals = bool("detectAnimals", default: false)
-        useFrontCamera = bool("useFrontCamera", default: false)
+        useFrontCamera = bool("useFrontCamera", default: true)
+        mirrorFrontPreview = bool("mirrorFrontPreview", default: true)
     }
 
     var detectorConfig: DetectorConfig {
