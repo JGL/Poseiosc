@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PoseioscShared
 
 struct SettingsView: View {
     @Bindable var model: AppModel
@@ -86,6 +87,8 @@ struct SettingsView: View {
                 Section("Statistics") {
                     LabeledContent("Messages sent", value: "\(model.sentCount)")
                     LabeledContent("Processed", value: "\(Int(model.processedFPS)) fps")
+                    LabeledContent("Frame", value: frameDescription)
+                    LabeledContent("App version", value: appVersion)
                 }
 
                 Section {
@@ -109,6 +112,25 @@ struct SettingsView: View {
                 portText = String(model.settings.port)
             }
         }
+    }
+
+    private var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "\(version) (\(build))"
+    }
+
+    /// e.g. "720×1280 · 90° portrait" — mirrors what /camerainfo broadcasts.
+    private var frameDescription: String {
+        let snapshot = model.overlay
+        guard snapshot.width > 0 else { return "—" }
+        let info = CameraInfo(
+            width: snapshot.width, height: snapshot.height,
+            orientationDegrees: snapshot.rotationDegrees,
+            facing: snapshot.isFrontCamera ? 1 : 0
+        )
+        return "\(info.width)×\(info.height) · \(info.orientationDegrees)° \(info.orientationName)"
     }
 
     private func select(_ receiver: DiscoveredReceiver) {

@@ -37,14 +37,18 @@ final class CameraManager: NSObject, @unchecked Sendable {
     private var conveyor: FrameConveyor?
     private(set) var position: AVCaptureDevice.Position = .back
 
-    private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
-    private var rotationObservation: NSKeyValueObservation?
+    /// The interface-orientation-derived angle, pushed from the UI layer
+    /// whenever the interface rotates. Used only in Auto mode; a locked
+    /// orientation bypasses it entirely. Defaults to portrait.
+    ///
+    /// Deliberately NOT AVCaptureDevice.RotationCoordinator: its gravity-fed
+    /// angles proved unreliable on device (stuck at 0° with the system
+    /// rotation lock engaged). Driving everything from the interface
+    /// orientation makes preview, overlay, and OSC data agree by
+    /// construction — what you see is what is sent.
+    private let autoAngle = OSAllocatedUnfairLock<Int32>(initialState: 90)
 
-    /// The rotation angle frames are currently interpreted with. Written from
-    /// the KVO callback / settings changes, read on the video queue per frame.
-    private let effectiveAngle = OSAllocatedUnfairLock<Int32>(initialState: 90)
-
-    /// The user's orientation setting (nil-equivalent: .auto follows device).
+    /// The user's orientation setting (.auto follows the interface).
     private let orientationLock = OSAllocatedUnfairLock<CameraOrientationSetting>(initialState: .auto)
 
     override init() {
@@ -83,7 +87,18 @@ final class CameraManager: NSObject, @unchecked Sendable {
 
     func setOrientationLock(_ setting: CameraOrientationSetting) {
         orientationLock.withLock { $0 = setting }
-        applyRotation()
+    }
+
+    /// Called from the UI layer whenever the interface orientation changes.
+    func setAutoInterfaceAngle(_ angle: Int32) {
+        autoAngle.withLock { $0 = angle }
+    }
+
+    /// The angle frames are currently interpreted with (also what /camerainfo
+    /// reports). The view layer uses this to counter-rotate the preview for
+    /// non-portrait orientations.
+    var effectiveAngle: Int32 {
+        currentCaptureAngle()
     }
 
     private func configure(position newPosition: AVCaptureDevice.Position) {
@@ -137,38 +152,23 @@ final class CameraManager: NSObject, @unchecked Sendable {
         }
 
         session.commitConfiguration()
-
-        // Recreate the rotation coordinator for the new device and follow its
-        // angle updates. (Created after commit; it needs the live device.)
-        let coordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: previewLayer)
-        rotationCoordinator = coordinator
-        rotationObservation = coordinator.observe(
-            \.videoRotationAngleForHorizonLevelPreview,
-            options: [.initial, .new]
-        ) { [weak self] _, _ in
-            self?.applyRotation()
-        }
     }
 
-    /// Recomputes the effective angle from the lock setting (or the rotation
-    /// coordinator in Auto) and applies it to the preview connection.
-    private func applyRotation() {
+    /// The angle frames are interpreted with right now: the user's lock wins;
+    /// Auto uses the interface-orientation angle. Read per frame, so no
+    /// callback ordering can ever leave a stale value in the pipeline.
+    ///
+    /// NOTE: the preview connection's rotation is deliberately never touched.
+    /// Its default renders upright portrait (verified across every build);
+    /// explicit `videoRotationAngle` writes proved unreliable on device. For
+    /// non-portrait orientations the view layer counter-rotates the preview
+    /// in SwiftUI instead (see ContentView).
+    private func currentCaptureAngle() -> Int32 {
         let lock = orientationLock.withLock { $0 }
-        let angle: Int32
         if lock == .auto {
-            let coordinatorAngle = rotationCoordinator?.videoRotationAngleForHorizonLevelPreview ?? 90
-            angle = Int32(coordinatorAngle.rounded())
-        } else {
-            angle = Int32(lock.rawValue)
+            return autoAngle.withLock { $0 }
         }
-        effectiveAngle.withLock { $0 = angle }
-
-        DispatchQueue.main.async { [self] in
-            if let connection = previewLayer.connection,
-               connection.isVideoRotationAngleSupported(CGFloat(angle)) {
-                connection.videoRotationAngle = CGFloat(angle)
-            }
-        }
+        return Int32(lock.rawValue)
     }
 
     private static func visionOrientation(forAngle angle: Int32) -> CGImagePropertyOrientation {
@@ -192,7 +192,7 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
             let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
         else { return }
 
-        let angle = effectiveAngle.withLock { $0 }
+        let angle = currentCaptureAngle()
         let orientation = Self.visionOrientation(forAngle: angle)
         let bufferWidth = Int32(CVPixelBufferGetWidth(pixelBuffer))
         let bufferHeight = Int32(CVPixelBufferGetHeight(pixelBuffer))

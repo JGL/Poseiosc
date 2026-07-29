@@ -210,6 +210,73 @@ Decisions (with Joel):
   if a device really reports it, investigate session-preset fallback then.
 - Versions bumped to 1.1.0 (build 2), now shared project-wide settings.
 
+### v1.1 on-device fix round (2026-07-29)
+
+Joel's first device test: portrait-locked selfie showed the overlay (and the
+receiver's skeleton) rotated 90°, with the status capsule reading 1280×720 —
+i.e. the lock never reached the capture pipeline; Vision analyzed frames as
+landscape while the preview correctly displayed portrait. The lock value had
+flowed through cached state + KVO callbacks, where a race could leave the
+default landscape angle in place. Fixes:
+
+- The orientation lock is now read **directly in the frame callback** — with
+  a lock set, no callback ordering can produce a wrong angle.
+- Auto mode caches `videoRotationAngleForHorizonLevelCapture` (not the
+  *preview* angle, which can differ for the front camera) via KVO; the
+  rotation coordinator is created on the main thread (it observes a CALayer).
+- When the camera orientation is locked, the **interface orientation is
+  locked to match** (UIApplicationDelegate mask + `requestGeometryUpdate`),
+  so the UI can't rotate out from under a locked capture configuration.
+- Settings → Statistics now shows the live transmitted frame description
+  ("720×1280 · 90° portrait") for at-a-glance diagnosis.
+
+### v1.1 second fix round (2026-07-29)
+
+Joel's retest (screenshots): still 1280×720 landscape in upright portrait
+with the system rotation lock on; the in-app orientation picker reportedly
+wouldn't change; Mac receiver confirmed landscape data. Simulator
+reproduction showed the picker working in the current build, pointing at the
+rotation coordinator as the remaining fault: its gravity-fed angles can sit
+at 0° (notably with the system rotation lock suppressing orientation
+events).
+
+**Decision: drop `AVCaptureDevice.RotationCoordinator` entirely.** Auto mode
+now derives the angle from the **interface orientation** (read from the
+window scene on every root-view size change): portrait 90°, landscapeRight
+0°, landscapeLeft 180°, upside-down 270°. The same value drives the preview
+connection rotation and the per-frame Vision interpretation, so what is on
+screen and what is sent cannot disagree by construction. With the system
+rotation lock on, the UI stays portrait and so does the data — the correct
+outcome. Flat-mounted rigs use the manual lock as designed. Settings →
+Statistics gained an "App version" row (e.g. "1.1.0 (3)") to make
+which-binary-is-this unambiguous during test rounds; build bumped to 3.
+
+### v1.1 third fix round (2026-07-29)
+
+Joel's retest with build 3: data pipeline fully correct (720×1280 portrait
+everywhere, receiver perfect, overlay registered) but the sender's *video*
+displayed rotated 90° — the explicit `videoRotationAngle` write on the
+preview connection did not take effect on device, despite carrying the
+correct value.
+
+**Decision: never touch the preview connection's rotation.** Its default
+renders upright portrait — verified across every build since v1.0. For
+non-portrait orientations the preview is counter-rotated in SwiftUI view
+space instead (`rotationEffect` + swapped framing so aspect-fill still covers
+the screen); in portrait this applies no transform at all, i.e. exactly the
+historically-verified path. Build bumped to 4.
+
+### v1.1 fourth fix round (2026-07-29)
+
+Build 4 on device: portrait fully correct (video, overlay, receiver, mirror
+toggle behavior all verified by Joel). Both landscape directions showed video
+and overlay consistent with each other but 180° from reality — the tell that
+the pipeline was self-consistent and only the interface→angle mapping had
+the two landscape cases swapped (Apple's device vs interface landscape
+naming crosses over: a device rotated anticlockwise reports interface
+.landscapeRight). Fixed: .landscapeRight → 180°, .landscapeLeft → 0°.
+Build 5.
+
 ## Verification record (2026-07-28)
 
 - `swift test` in `PoseioscShared`: 18 tests green, including round-trips for

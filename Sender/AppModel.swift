@@ -9,6 +9,7 @@
 import Foundation
 import AVFoundation
 import Observation
+import UIKit
 
 @Observable @MainActor
 final class AppModel {
@@ -54,9 +55,50 @@ final class AppModel {
     func applySettings() {
         oscSender.setDestination(host: settings.host, port: settings.port)
         camera.setOrientationLock(settings.cameraOrientation)
+        applyInterfaceOrientation()
         let config = settings.detectorConfig
         Task { [processor] in
             await processor?.setConfig(config)
+        }
+    }
+
+    /// Reads the current interface orientation and feeds it to the camera as
+    /// the Auto-mode angle. Triggered from the view layer on size changes —
+    /// the interface orientation is the single source of truth for Auto, so
+    /// what's on screen and what's sent can never disagree.
+    func refreshInterfaceOrientation() {
+        let orientation = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.effectiveGeometry.interfaceOrientation ?? .portrait
+
+        // Device-verified mapping (2026-07-29): interface .landscapeRight is
+        // the device rotated ANTICLOCKWISE (Apple's device/interface landscape
+        // names cross over) and needs 180°; .landscapeLeft needs 0°.
+        let angle: Int32 = switch orientation {
+        case .portrait: 90
+        case .portraitUpsideDown: 270
+        case .landscapeRight: 180
+        case .landscapeLeft: 0
+        default: 90
+        }
+        camera.setAutoInterfaceAngle(angle)
+    }
+
+    /// Locks the UI orientation to match a locked camera orientation, so the
+    /// interface can never rotate out from under the capture configuration.
+    private func applyInterfaceOrientation() {
+        let mask: UIInterfaceOrientationMask = switch settings.cameraOrientation {
+        case .auto: .allButUpsideDown
+        case .portrait: .portrait
+        case .landscapeLeft, .landscapeRight: .landscape
+        }
+        SenderAppDelegate.orientationMask.value = mask
+
+        for scene in UIApplication.shared.connectedScenes {
+            guard let windowScene = scene as? UIWindowScene else { continue }
+            windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: mask))
+            windowScene.keyWindow?.rootViewController?
+                .setNeedsUpdateOfSupportedInterfaceOrientations()
         }
     }
 

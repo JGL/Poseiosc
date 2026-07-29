@@ -28,6 +28,8 @@ struct DetectorConfig: Sendable, Equatable {
 struct OverlaySnapshot: Sendable {
     var width: Int32 = 0
     var height: Int32 = 0
+    var rotationDegrees: Int32 = 90
+    var isFrontCamera = false
     var poses: [PoseDetection] = []
     var hands: [HandDetection] = []
     var faces: [FaceDetection] = []
@@ -53,7 +55,12 @@ actor VisionProcessor {
     func process(_ frame: FrameBox) async {
         let cfg = config
         let started = ContinuousClock.now
-        var snapshot = OverlaySnapshot(width: frame.orientedWidth, height: frame.orientedHeight)
+        var snapshot = OverlaySnapshot(
+            width: frame.orientedWidth,
+            height: frame.orientedHeight,
+            rotationDegrees: frame.rotationDegrees,
+            isFrontCamera: frame.isFrontCamera
+        )
 
         // Camera geometry first, so receivers can interpret what follows.
         sender.send(WireCodec.encodeCameraInfo(CameraInfo(
