@@ -5,20 +5,28 @@
 //  Sends synthetic animated Poseiosc/VisionOSC frames over OSC so the macOS
 //  receiver can be tested without an iPhone.
 //
-//  Usage: swift run poseiosc-testsend [host] [port]
-//  Defaults: 127.0.0.1 9527
+//  Usage: swift run poseiosc-testsend [--landscape] [host] [port]
+//  Defaults: portrait frames to 127.0.0.1 9527
 //
 
 import Foundation
 import PoseioscShared
 import SwiftOSC
 
-let arguments = CommandLine.arguments
-let host = arguments.count > 1 ? arguments[1] : "127.0.0.1"
-let port = arguments.count > 2 ? UInt16(arguments[2]) ?? 9527 : 9527
+var arguments = Array(CommandLine.arguments.dropFirst())
+let isLandscape = arguments.contains("--landscape")
+arguments.removeAll { $0 == "--landscape" }
+let host = arguments.count > 0 ? arguments[0] : "127.0.0.1"
+let port = arguments.count > 1 ? UInt16(arguments[1]) ?? 9527 : 9527
 
-let frameWidth: Int32 = 1080
-let frameHeight: Int32 = 1920
+// Mimics the sender's 720p capture: portrait 720x1280, landscape 1280x720.
+let frameWidth: Int32 = isLandscape ? 1280 : 720
+let frameHeight: Int32 = isLandscape ? 720 : 1280
+let cameraInfo = CameraInfo(
+    width: frameWidth, height: frameHeight,
+    orientationDegrees: isLandscape ? 0 : 90,
+    facing: 1
+)
 let fps = 30.0
 
 let client = OSCUDPClient()
@@ -29,7 +37,7 @@ do {
     exit(1)
 }
 
-print("poseiosc-testsend → \(host):\(port) at \(Int(fps)) fps (Ctrl-C to stop)")
+print("poseiosc-testsend → \(host):\(port) at \(Int(fps)) fps, \(frameWidth)x\(frameHeight) \(cameraInfo.orientationName) (Ctrl-C to stop)")
 
 /// A stick figure whose limbs sway with sine waves, roughly centered in frame.
 func syntheticPose(time t: Double) -> PoseDetection {
@@ -138,6 +146,7 @@ let start = Date()
 while true {
     let t = Date().timeIntervalSince(start)
     let messages: [OSCMessage] = [
+        WireCodec.encodeCameraInfo(cameraInfo),
         WireCodec.encodePoses(DetectionFrame(width: frameWidth, height: frameHeight, detections: [syntheticPose(time: t)])),
         WireCodec.encodeHands(DetectionFrame(width: frameWidth, height: frameHeight, detections: [syntheticHand(time: t)])),
         WireCodec.encodeFaces(DetectionFrame(width: frameWidth, height: frameHeight, detections: [syntheticFace(time: t)])),

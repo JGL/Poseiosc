@@ -34,6 +34,10 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_FRAMEWORK_EXTENSIONS: YES
     STRING_CATALOG_GENERATE_SYMBOLS: YES
+    # Shared by both apps. Bump CURRENT_PROJECT_VERSION for every TestFlight
+    # upload; MARKETING_VERSION is the user-facing version and release tag.
+    MARKETING_VERSION: "1.1.0"
+    CURRENT_PROJECT_VERSION: "2"
 
 targets:
   PoseioscSender:
@@ -58,17 +62,16 @@ targets:
         NSLocalNetworkUsageDescription: "Poseiosc sends OSC tracking data to receivers on your local network and browses for them via Bonjour."
         NSBonjourServices: ["_osc._udp"]
         UILaunchScreen: {}
-        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         UIRequiresFullScreen: true
     settings:
       base:
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        # Bump CURRENT_PROJECT_VERSION for every TestFlight upload;
-        # MARKETING_VERSION is the user-facing version.
-        MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "1"
 
   PoseioscReceiver:
     type: application
@@ -83,6 +86,8 @@ targets:
       path: Receiver/Info.plist
       properties:
         CFBundleDisplayName: Poseiosc Receiver
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSLocalNetworkUsageDescription: "Poseiosc Receiver listens for OSC tracking data and advertises itself on your local network via Bonjour."
         NSBonjourServices: ["_osc._udp"]
     settings:

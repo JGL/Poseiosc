@@ -44,8 +44,21 @@ struct SidebarView: View {
             }
             .foregroundStyle(.secondary)
             .padding(.top, 4)
+
+            HStack {
+                Text("Camera")
+                Spacer()
+                Text(cameraLabel)
+                    .font(.system(.body, design: .monospaced))
+            }
+            .foregroundStyle(.secondary)
         }
         .padding()
+    }
+
+    private var cameraLabel: String {
+        guard let info = model.cameraInfo else { return "—" }
+        return "\(info.width)×\(info.height) \(info.orientationName), \(info.isFrontCamera ? "front" : "back")"
     }
 
     private var logSection: some View {

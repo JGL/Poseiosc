@@ -109,6 +109,38 @@ public struct DetectionFrame<Detection: Sendable & Equatable>: Sendable, Equatab
     }
 }
 
+/// Camera geometry broadcast alongside detection frames so receivers don't
+/// have to infer orientation. `orientationDegrees` is the rotation of the
+/// phone relative to its sensor-native landscape position: 0 = landscape,
+/// 90 = portrait, 180 = opposite landscape, 270 = portrait upside down —
+/// the same values as AVFoundation's video rotation angles.
+public struct CameraInfo: Sendable, Equatable {
+    public var width: Int32
+    public var height: Int32
+    public var orientationDegrees: Int32
+    /// 0 = back camera, 1 = front camera.
+    public var facing: Int32
+
+    public init(width: Int32, height: Int32, orientationDegrees: Int32, facing: Int32) {
+        self.width = width
+        self.height = height
+        self.orientationDegrees = orientationDegrees
+        self.facing = facing
+    }
+
+    public var isFrontCamera: Bool { facing == 1 }
+
+    public var orientationName: String {
+        switch orientationDegrees {
+        case 0: "landscape"
+        case 90: "portrait"
+        case 180: "landscape (flipped)"
+        case 270: "portrait (upside down)"
+        default: "\(orientationDegrees)°"
+        }
+    }
+}
+
 /// A decoded incoming message, dispatched by OSC address.
 public enum DecodedFrame: Sendable {
     case poses(DetectionFrame<PoseDetection>)
@@ -116,6 +148,7 @@ public enum DecodedFrame: Sendable {
     case faces(DetectionFrame<FaceDetection>)
     case texts(DetectionFrame<BoxDetection>)
     case animals(DetectionFrame<BoxDetection>)
+    case cameraInfo(CameraInfo)
 
     /// The OSC address this frame kind corresponds to.
     public var address: String {
@@ -125,6 +158,7 @@ public enum DecodedFrame: Sendable {
         case .faces: OSCAddress.faces
         case .texts: OSCAddress.texts
         case .animals: OSCAddress.animals
+        case .cameraInfo: OSCAddress.cameraInfo
         }
     }
 }

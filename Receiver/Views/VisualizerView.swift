@@ -40,6 +40,14 @@ struct VisualizerView: View {
                 let frameRect = CGRect(x: offsetX, y: offsetY, width: CGFloat(frameW) * scale, height: CGFloat(frameH) * scale)
                 context.stroke(Path(frameRect), with: .color(.gray.opacity(0.5)), lineWidth: 1)
 
+                drawCoordinateGuides(
+                    context: context,
+                    frameRect: frameRect,
+                    frameW: frameW,
+                    frameH: frameH,
+                    info: model.cameraInfo
+                )
+
                 func mapPoint(_ p: WirePoint) -> CGPoint {
                     CGPoint(x: offsetX + CGFloat(p.x) * scale, y: offsetY + CGFloat(p.y) * scale)
                 }
@@ -87,11 +95,77 @@ struct VisualizerView: View {
                                 .foregroundStyle(kind.color)
                             context.draw(label, at: CGPoint(x: rect.minX + 4, y: max(rect.minY - 10, 8)), anchor: .leading)
                         }
+                    case .cameraInfo:
+                        break  // not a drawable frame; shown via coordinate guides
                     }
                 }
             }
         }
         .accessibilityLabel("OSC tracking visualizer")
+    }
+
+    /// Origin marker, axis arrows, transmitted dimensions, and camera
+    /// orientation — so "which way is up" is answered at a glance.
+    private func drawCoordinateGuides(
+        context: GraphicsContext,
+        frameRect: CGRect,
+        frameW: Int32,
+        frameH: Int32,
+        info: CameraInfo?
+    ) {
+        let guide = Color.gray
+        let origin = CGPoint(x: frameRect.minX, y: frameRect.minY)
+        let axisLength: CGFloat = 48
+
+        // Origin dot
+        context.fill(
+            Path(ellipseIn: CGRect(x: origin.x - 4, y: origin.y - 4, width: 8, height: 8)),
+            with: .color(guide)
+        )
+
+        func arrow(to end: CGPoint) -> Path {
+            var path = Path()
+            path.move(to: origin)
+            path.addLine(to: end)
+            // Arrowhead
+            let angle = atan2(end.y - origin.y, end.x - origin.x)
+            for side in [angle + .pi * 0.85, angle - .pi * 0.85] {
+                path.move(to: end)
+                path.addLine(to: CGPoint(x: end.x + cos(side) * 8, y: end.y + sin(side) * 8))
+            }
+            return path
+        }
+
+        let xEnd = CGPoint(x: origin.x + axisLength, y: origin.y)
+        let yEnd = CGPoint(x: origin.x, y: origin.y + axisLength)
+        context.stroke(arrow(to: xEnd), with: .color(guide), lineWidth: 1.5)
+        context.stroke(arrow(to: yEnd), with: .color(guide), lineWidth: 1.5)
+
+        let labelFont = Font.caption.monospaced()
+        context.draw(
+            Text("x").font(labelFont).foregroundStyle(guide),
+            at: CGPoint(x: xEnd.x + 10, y: xEnd.y), anchor: .leading
+        )
+        context.draw(
+            Text("y").font(labelFont).foregroundStyle(guide),
+            at: CGPoint(x: yEnd.x, y: yEnd.y + 10), anchor: .top
+        )
+        context.draw(
+            Text("(0,0)").font(labelFont).foregroundStyle(guide),
+            at: CGPoint(x: origin.x + 8, y: origin.y - 8), anchor: .bottomLeading
+        )
+
+        // Dimensions + orientation caption along the bottom edge of the frame
+        // (inside it, so it is never clipped by the view bounds).
+        var caption = "\(frameW)×\(frameH) px"
+        if let info {
+            caption += " · \(info.orientationName) · \(info.isFrontCamera ? "front" : "back") camera"
+        }
+        context.draw(
+            Text(caption).font(labelFont).foregroundStyle(guide),
+            at: CGPoint(x: frameRect.midX, y: frameRect.maxY - 8),
+            anchor: .bottom
+        )
     }
 
     private func drawSkeleton(
@@ -128,6 +202,7 @@ struct VisualizerView: View {
         case .faces(let f): (f.width, f.height)
         case .texts(let f): (f.width, f.height)
         case .animals(let f): (f.width, f.height)
+        case .cameraInfo(let info): (info.width, info.height)
         }
     }
 

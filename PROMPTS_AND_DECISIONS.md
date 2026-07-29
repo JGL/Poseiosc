@@ -171,6 +171,45 @@ the leading slash on addresses; the code is authoritative).
   (`swift Design/render_icons.swift <outputDir>`), and `sips` downscales the
   macOS size set. No binary-only design sources.
 
+## v1.1 — Beta feedback round from Golan Levin (2026-07-29)
+
+Golan's TestFlight feedback (paraphrased): (1) wants a software option to
+declare the expected camera orientation — trackers do much better without a
+90° rotation to compensate — and the OSC should communicate orientation and
+dimensions; (2) uses LingDong-'s Processing receiver because he has no Xcode
+toolchain, suggested forking it; (3) general coordinate friction (orientation,
+the mirror option, unknown dimensions — he reported a puzzling "2436×1126").
+
+Decisions (with Joel):
+
+- **Orientation**: auto-rotating UI via `AVCaptureDevice.RotationCoordinator`
+  plus a manual lock (Portrait/Landscape Left/Landscape Right) in Settings.
+  The lock exists because gravity-based auto-detection fails when the phone
+  is mounted flat — precisely the installation rig case. Locked mode also
+  drives the preview rotation, so a mounted phone previews upright.
+  Angle → Vision mapping extends the verified portrait case (90° = .right;
+  0 = .up, 180 = .down, 270 = .left) — to be confirmed on device.
+- **`/camerainfo` message** (additive; VisionOSC receivers ignore unknown
+  addresses): `int32 width, height, orientationDegrees (0/90/180/270),
+  facing (0 back / 1 front)`, sent every processed frame. Pinned by its own
+  golden-bytes test. The five VisionOSC messages are untouched.
+- **Distribution**: rather than forking the Processing receiver, the macOS
+  receiver is distributed as a **signed + notarized** zip on GitHub Releases
+  (`Scripts/release-receiver.sh`: archive → Developer ID export → notarytool
+  → staple → `gh release create`). Notarization chosen over unsigned-zip +
+  quarantine-removal instructions: zero Gatekeeper friction for students.
+  Local script now; a GitHub Actions workflow (needs cert + ASC API key as
+  repo secrets) can come later.
+- **Coordinate friction**: README gains a coordinate-system section with
+  diagram and Processing snippet; the receiver canvas draws origin/axes/dims/
+  orientation; the sender status capsule shows the transmitted dims. A
+  normalized-coordinates mode was considered and **rejected** (diverges from
+  VisionOSC's format).
+- Golan's "2436×1126" doesn't match any capture format we request (720p);
+  with dims now visible on sender, receiver, and wire, he can re-check —
+  if a device really reports it, investigate session-preset fallback then.
+- Versions bumped to 1.1.0 (build 2), now shared project-wide settings.
+
 ## Verification record (2026-07-28)
 
 - `swift test` in `PoseioscShared`: 18 tests green, including round-trips for

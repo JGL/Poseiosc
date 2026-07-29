@@ -6,15 +6,18 @@
 //  LingDong-'s VisionOSC: https://github.com/LingDong-/VisionOSC
 //
 
-/// The five OSC address patterns emitted by VisionOSC (and by Poseiosc).
+/// The five OSC address patterns emitted by VisionOSC (and by Poseiosc),
+/// plus Poseiosc's additive /camerainfo message (unknown to — and safely
+/// ignored by — original VisionOSC receivers).
 public enum OSCAddress {
     public static let poses = "/poses/arr"
     public static let hands = "/hands/arr"
     public static let faces = "/faces/arr"
     public static let texts = "/texts/arr"
     public static let animals = "/animals/arr"
+    public static let cameraInfo = "/camerainfo"
 
-    public static let all: [String] = [poses, hands, faces, texts, animals]
+    public static let all: [String] = [poses, hands, faces, texts, animals, cameraInfo]
 }
 
 /// Fixed keypoint counts per detection type (VisionOSC constants.h).

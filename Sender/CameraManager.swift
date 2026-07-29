@@ -7,15 +7,20 @@
 //
 //  Orientation: buffers are delivered sensor-native (landscape) and
 //  unmirrored (mirroring is disabled on the connection). Instead of rotating
-//  pixels, we tell Vision how the buffer is oriented. The app is locked to
-//  portrait and both cameras are mounted the same way, so the orientation is
-//  always .right. Coordinates stay unmirrored, matching VisionOSC's
-//  convention; the preview is forced unmirrored too so overlay, preview, and
-//  OSC data all agree.
+//  pixels, we tell Vision how the buffer is oriented, derived from an
+//  AVCaptureDevice.RotationCoordinator in Auto mode or from the user's
+//  orientation lock (for mounted rigs, where gravity-based detection is
+//  unreliable — e.g. a phone lying flat). Angle → Vision mapping: 90° =
+//  .right (the empirically verified portrait case for both cameras), 0° =
+//  .up, 180° = .down, 270° = .left.
+//
+//  Coordinates stay unmirrored, matching VisionOSC's convention; the preview
+//  is forced unmirrored too so overlay, preview, and OSC data all agree.
 //
 
 @preconcurrency import AVFoundation
 import ImageIO
+import os.lock
 
 final class CameraManager: NSObject, @unchecked Sendable {
     let session = AVCaptureSession()
@@ -31,6 +36,16 @@ final class CameraManager: NSObject, @unchecked Sendable {
     private let output = AVCaptureVideoDataOutput()
     private var conveyor: FrameConveyor?
     private(set) var position: AVCaptureDevice.Position = .back
+
+    private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
+    private var rotationObservation: NSKeyValueObservation?
+
+    /// The rotation angle frames are currently interpreted with. Written from
+    /// the KVO callback / settings changes, read on the video queue per frame.
+    private let effectiveAngle = OSAllocatedUnfairLock<Int32>(initialState: 90)
+
+    /// The user's orientation setting (nil-equivalent: .auto follows device).
+    private let orientationLock = OSAllocatedUnfairLock<CameraOrientationSetting>(initialState: .auto)
 
     override init() {
         previewLayer = AVCaptureVideoPreviewLayer(session: session)
@@ -66,9 +81,13 @@ final class CameraManager: NSObject, @unchecked Sendable {
         }
     }
 
+    func setOrientationLock(_ setting: CameraOrientationSetting) {
+        orientationLock.withLock { $0 = setting }
+        applyRotation()
+    }
+
     private func configure(position newPosition: AVCaptureDevice.Position) {
         session.beginConfiguration()
-        defer { session.commitConfiguration() }
 
         for input in session.inputs {
             session.removeInput(input)
@@ -78,7 +97,10 @@ final class CameraManager: NSObject, @unchecked Sendable {
             let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: newPosition),
             let input = try? AVCaptureDeviceInput(device: device),
             session.canAddInput(input)
-        else { return }
+        else {
+            session.commitConfiguration()
+            return
+        }
 
         session.addInput(input)
         position = newPosition
@@ -91,7 +113,10 @@ final class CameraManager: NSObject, @unchecked Sendable {
         if !session.outputs.contains(output) {
             output.alwaysDiscardsLateVideoFrames = true
             output.setSampleBufferDelegate(self, queue: videoQueue)
-            guard session.canAddOutput(output) else { return }
+            guard session.canAddOutput(output) else {
+                session.commitConfiguration()
+                return
+            }
             session.addOutput(output)
         }
 
@@ -110,14 +135,49 @@ final class CameraManager: NSObject, @unchecked Sendable {
             preview.automaticallyAdjustsVideoMirroring = false
             preview.isVideoMirrored = false
         }
+
+        session.commitConfiguration()
+
+        // Recreate the rotation coordinator for the new device and follow its
+        // angle updates. (Created after commit; it needs the live device.)
+        let coordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: previewLayer)
+        rotationCoordinator = coordinator
+        rotationObservation = coordinator.observe(
+            \.videoRotationAngleForHorizonLevelPreview,
+            options: [.initial, .new]
+        ) { [weak self] _, _ in
+            self?.applyRotation()
+        }
     }
 
-    /// Vision orientation for the current camera in portrait UI.
-    /// Empirically verified on device: both cameras deliver sensor-native
-    /// buffers with the same mounting orientation, so both need `.right`.
-    /// (`.left` for the front camera produced results rotated 180°.)
-    private var visionOrientation: CGImagePropertyOrientation {
-        .right
+    /// Recomputes the effective angle from the lock setting (or the rotation
+    /// coordinator in Auto) and applies it to the preview connection.
+    private func applyRotation() {
+        let lock = orientationLock.withLock { $0 }
+        let angle: Int32
+        if lock == .auto {
+            let coordinatorAngle = rotationCoordinator?.videoRotationAngleForHorizonLevelPreview ?? 90
+            angle = Int32(coordinatorAngle.rounded())
+        } else {
+            angle = Int32(lock.rawValue)
+        }
+        effectiveAngle.withLock { $0 = angle }
+
+        DispatchQueue.main.async { [self] in
+            if let connection = previewLayer.connection,
+               connection.isVideoRotationAngleSupported(CGFloat(angle)) {
+                connection.videoRotationAngle = CGFloat(angle)
+            }
+        }
+    }
+
+    private static func visionOrientation(forAngle angle: Int32) -> CGImagePropertyOrientation {
+        switch angle {
+        case 90: .right
+        case 180: .down
+        case 270: .left
+        default: .up
+        }
     }
 }
 
@@ -132,16 +192,20 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
             let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
         else { return }
 
-        let orientation = visionOrientation
+        let angle = effectiveAngle.withLock { $0 }
+        let orientation = Self.visionOrientation(forAngle: angle)
         let bufferWidth = Int32(CVPixelBufferGetWidth(pixelBuffer))
         let bufferHeight = Int32(CVPixelBufferGetHeight(pixelBuffer))
 
-        // .left/.right rotate 90°, so oriented dims are swapped buffer dims.
+        // 90°/270° rotations swap the oriented dimensions.
+        let swapped = angle == 90 || angle == 270
         conveyor.submit(FrameBox(
             pixelBuffer: pixelBuffer,
             orientation: orientation,
-            orientedWidth: bufferHeight,
-            orientedHeight: bufferWidth
+            orientedWidth: swapped ? bufferHeight : bufferWidth,
+            orientedHeight: swapped ? bufferWidth : bufferHeight,
+            rotationDegrees: angle,
+            isFrontCamera: position == .front
         ))
     }
 }

@@ -97,6 +97,13 @@ struct RoundTripTests {
         #expect(out.detections.count == WireCounts.maxDetections)
     }
 
+    @Test func cameraInfo() throws {
+        let info = CameraInfo(width: 1280, height: 720, orientationDegrees: 0, facing: 1)
+        let decoded = try WireCodec.decode(WireCodec.encodeCameraInfo(info))
+        guard case .cameraInfo(let out) = decoded else { Issue.record("wrong kind"); return }
+        #expect(out == info)
+    }
+
     @Test func roundTripThroughRawBytes() throws {
         // Full serialize → parse cycle, not just in-memory value copying.
         let frame = DetectionFrame(width: 1080, height: 1920, detections: [makePose(seed: 7)])
@@ -151,6 +158,33 @@ struct GoldenBytesTests {
         appendFloat32(3, to: &expected)    // width
         appendFloat32(4, to: &expected)    // height
         appendString("Hi", to: &expected)
+
+        #expect(data == expected)
+    }
+
+    /// Pins the /camerainfo encoding: four big-endian int32s.
+    @Test func cameraInfoMessageBytes() throws {
+        let data = try WireCodec.encodeCameraInfo(
+            CameraInfo(width: 720, height: 1280, orientationDegrees: 90, facing: 1)
+        ).rawData()
+
+        var expected = Data()
+        func pad4(_ d: inout Data) { while d.count % 4 != 0 { d.append(0) } }
+        func appendString(_ s: String, to d: inout Data) {
+            d.append(s.data(using: .ascii)!)
+            d.append(0)
+            pad4(&d)
+        }
+        func appendInt32(_ v: Int32, to d: inout Data) {
+            withUnsafeBytes(of: v.bigEndian) { d.append(contentsOf: $0) }
+        }
+
+        appendString("/camerainfo", to: &expected)
+        appendString(",iiii", to: &expected)
+        appendInt32(720, to: &expected)
+        appendInt32(1280, to: &expected)
+        appendInt32(90, to: &expected)
+        appendInt32(1, to: &expected)
 
         #expect(data == expected)
     }

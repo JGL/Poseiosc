@@ -21,6 +21,17 @@ receivers (Processing, TouchDesigner, Max/MSP, openFrameworks…) work unchanged
 Not on the App Store — you build it yourself with a free or paid Apple
 developer account.
 
+## Quick start without building anything
+
+- **Mac receiver**: download `PoseioscReceiver-<version>-macOS.zip` from the
+  [Releases page](https://github.com/JGL/Poseiosc/releases), unzip, and open.
+  The app is signed and notarized, so there are no Gatekeeper hoops — just
+  allow the **Local Network** prompt on first launch.
+- **iPhone sender**: install via the TestFlight link (ask the maintainer),
+  using the free [TestFlight app](https://apps.apple.com/app/testflight/id899247664).
+
+Everything below is only needed if you want to build from source.
+
 ## Requirements
 
 - Xcode 16 or newer (with the iOS 18 and macOS 15 SDKs)
@@ -85,6 +96,24 @@ it's advertising. You can change the port and press **Restart**.
    **always unmirrored**, matching VisionOSC. Turn the mirror off in
    Settings → Preview if you want the screen to match the receiver exactly.
 
+### Camera orientation
+
+The sender works in portrait **and landscape**. Tracking quality is best when
+the declared orientation matches how the camera is actually held, because
+Vision then analyzes unrotated frames.
+
+- **Auto (default)**: follows the device as you rotate it; the transmitted
+  frame dimensions swap accordingly (e.g. 720×1280 ↔ 1280×720).
+- **Portrait / Landscape Left / Landscape Right** (Settings → Camera): locks
+  the assumed orientation. Use this when the phone is **mounted** — on a
+  tripod, clamped sideways, or lying flat — because automatic detection
+  relies on gravity and fails when the phone is flat. If a locked landscape
+  preview appears upside down, pick the other landscape option.
+
+The current orientation and dimensions are always broadcast in the
+`/camerainfo` OSC message and shown in the sender's status capsule and the
+receiver's canvas.
+
 ### Testing without an iPhone
 
 The shared package includes two CLI tools (run from `PoseioscShared/`):
@@ -93,9 +122,10 @@ The shared package includes two CLI tools (run from `PoseioscShared/`):
 swift run poseiosc-testsend 127.0.0.1 9527
 ```
 
-sends synthetic animated frames of all five message types — point it at the
+sends synthetic animated frames of all message types — point it at the
 receiver and you should see a walking stick figure, a waving hand, a face
-ring, a "HELLO" text box, and a "Cat" box.
+ring, a "HELLO" text box, and a "Cat" box. Add `--landscape` to send
+landscape-oriented frames instead of portrait.
 
 ```bash
 swift run poseiosc-testlisten 9527
@@ -140,12 +170,82 @@ The project already sets `ITSAppUsesNonExemptEncryption` to false (the app
 contains no custom cryptography), so uploads skip the export-compliance
 question.
 
+## Releasing the receiver (maintainers)
+
+`Scripts/release-receiver.sh` archives the macOS receiver, signs it with your
+Developer ID, notarizes and staples it, and publishes the zip as a GitHub
+Release — so end users can download and double-click with no Gatekeeper
+friction.
+
+One-time setup:
+
+1. A **Developer ID Application** certificate: Xcode → Settings → Accounts →
+   your team → Manage Certificates → ＋.
+2. Notary credentials in your keychain (use an
+   [app-specific password](https://appleid.apple.com)):
+
+```bash
+xcrun notarytool store-credentials poseiosc-notary --apple-id you@example.com --team-id YOURTEAMID --password your-app-specific-password
+```
+
+3. The [GitHub CLI](https://cli.github.com) authenticated (`gh auth login`).
+
+Then, per release — bump `MARKETING_VERSION` in `project.yml`, run
+`xcodegen generate`, commit, and:
+
+```bash
+POSEIOSC_TEAM_ID=YOURTEAMID Scripts/release-receiver.sh
+```
+
+Add `--dry-run` to build/notarize without publishing.
+
+## Coordinate system
+
+Everything on the wire uses one convention — the same one VisionOSC uses:
+
+```
+(0,0) ──────────► x                width
+  │  ┌───────────────────────────────┐
+  │  │                               │
+  ▼  │        pixels, y down         │ height
+  y  │                               │
+     └───────────────────────────(w,h)
+```
+
+- **Pixels**, not normalized: divide by the frame width/height from the
+  message header (or `/camerainfo`) to normalize.
+- **Origin top-left, y grows downward** (screen convention, not math
+  convention).
+- **Never mirrored.** The selfie-mirror option only flips the phone's
+  *display*; wire coordinates are always the unmirrored scene.
+- **Dimensions follow orientation**: portrait sends 720×1280, landscape
+  1280×720. Listen to `/camerainfo` and your mapping code needs no
+  special-casing:
+
+```java
+// Processing: map a Poseiosc point into your sketch window
+float sx = x / frameW * width;   // frameW/frameH from the message header
+float sy = y / frameH * height;
+```
+
+- A keypoint that wasn't detected arrives as `x=0, y=frameHeight,
+  confidence=0` — always filter on `confidence == 0`.
+
 ## OSC wire format
 
 Byte-compatible with VisionOSC. All messages are sent unbundled over UDP, one
 per enabled detector per processed frame, **including when nothing is
-detected** (header-only). Coordinates are **pixels** in the transmitted frame
-size, **origin top-left**, unmirrored.
+detected** (header-only). Coordinates are as described above.
+
+**`/camerainfo`** (Poseiosc addition; VisionOSC receivers ignore it) —
+sent with every processed frame:
+
+| # | Type | Value |
+|---|------|-------|
+| 0 | int32 | frame width in pixels |
+| 1 | int32 | frame height in pixels |
+| 2 | int32 | orientation: 0 = landscape, 90 = portrait, 180 = landscape flipped, 270 = portrait upside-down |
+| 3 | int32 | camera facing: 0 = back, 1 = front |
 
 Every message begins with the same header:
 

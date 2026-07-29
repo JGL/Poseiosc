@@ -8,6 +8,28 @@
 import Foundation
 import Observation
 
+/// The user's declared camera orientation. Auto follows the device via
+/// AVCaptureDevice.RotationCoordinator; the fixed options exist for mounted
+/// rigs (tripods, flat mounts) where gravity-based detection is unreliable.
+/// The rawValue degrees are AVFoundation video rotation angles.
+enum CameraOrientationSetting: Int, CaseIterable, Identifiable {
+    case auto = -1
+    case portrait = 90
+    case landscapeLeft = 0
+    case landscapeRight = 180
+
+    var id: Int { rawValue }
+
+    var label: String {
+        switch self {
+        case .auto: "Auto (follow device)"
+        case .portrait: "Portrait"
+        case .landscapeLeft: "Landscape Left"
+        case .landscapeRight: "Landscape Right"
+        }
+    }
+}
+
 @Observable @MainActor
 final class SettingsStore {
     var host: String { didSet { defaults.set(host, forKey: "oscHost") } }
@@ -24,6 +46,10 @@ final class SettingsStore {
     /// Mirrors the on-screen preview and overlay in selfie mode so it feels
     /// like a mirror. Display-only: OSC coordinates are always unmirrored.
     var mirrorFrontPreview: Bool { didSet { defaults.set(mirrorFrontPreview, forKey: "mirrorFrontPreview") } }
+
+    var cameraOrientation: CameraOrientationSetting {
+        didSet { defaults.set(cameraOrientation.rawValue, forKey: "cameraOrientation") }
+    }
 
     private let defaults = UserDefaults.standard
 
@@ -43,6 +69,8 @@ final class SettingsStore {
         detectAnimals = bool("detectAnimals", default: false)
         useFrontCamera = bool("useFrontCamera", default: true)
         mirrorFrontPreview = bool("mirrorFrontPreview", default: true)
+        let storedOrientation = defaults.object(forKey: "cameraOrientation") as? Int
+        cameraOrientation = storedOrientation.flatMap(CameraOrientationSetting.init(rawValue:)) ?? .auto
     }
 
     var detectorConfig: DetectorConfig {

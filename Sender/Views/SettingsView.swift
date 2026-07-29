@@ -62,6 +62,20 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Camera") {
+                    Picker("Orientation", selection: $settings.cameraOrientation) {
+                        ForEach(CameraOrientationSetting.allCases) { setting in
+                            Text(setting.label).tag(setting)
+                        }
+                    }
+                    Text("Lock the orientation when the phone is mounted (tripod, flat rig) — automatic detection relies on gravity and fails when the phone lies flat. If a locked landscape preview appears upside down, pick the other landscape option.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .onChange(of: settings.cameraOrientation) {
+                    model.applySettings()
+                }
+
                 Section("Preview") {
                     Toggle("Mirror selfie preview", isOn: $settings.mirrorFrontPreview)
                     Text("Front camera only. Display-only — the OSC coordinates sent to receivers are always unmirrored.")

@@ -70,3 +70,6 @@ fastlane/test_output
 
 # Local build output
 build/
+
+# Release build artifacts
+build/

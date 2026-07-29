@@ -43,6 +43,9 @@ final class ReceiverModel {
     /// Total messages received since launch.
     var totalMessages: UInt64 = 0
 
+    /// Latest /camerainfo from the sender (nil until one arrives or when stale).
+    var cameraInfo: CameraInfo?
+
     private let service = ReceiverService()
     private var refreshTask: Task<Void, Never>?
 
@@ -98,6 +101,11 @@ final class ReceiverModel {
         latest = snapshot.latest
         rates = snapshot.rates
         totalMessages = snapshot.totalMessages
+        if let seenAt = snapshot.cameraInfoSeenAt, Date.now.timeIntervalSince(seenAt) < 2.0 {
+            cameraInfo = snapshot.cameraInfo
+        } else {
+            cameraInfo = nil
+        }
         if !isLogPaused && !snapshot.newLogEntries.isEmpty {
             log.insert(contentsOf: snapshot.newLogEntries.reversed(), at: 0)
             if log.count > Self.logCap {

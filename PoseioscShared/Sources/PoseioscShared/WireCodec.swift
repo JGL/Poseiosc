@@ -43,6 +43,12 @@ public enum WireCodec {
         encodeBoxes(address: OSCAddress.animals, frame: frame)
     }
 
+    public static func encodeCameraInfo(_ info: CameraInfo) -> OSCMessage {
+        OSCMessage(OSCAddress.cameraInfo, values: [
+            info.width, info.height, info.orientationDegrees, info.facing
+        ])
+    }
+
     private static func encodeKeypoints<D: Sendable & Equatable>(
         address: String,
         frame: DetectionFrame<D>,
@@ -94,9 +100,21 @@ public enum WireCodec {
             return try .texts(decodeBoxes(message))
         case OSCAddress.animals:
             return try .animals(decodeBoxes(message))
+        case OSCAddress.cameraInfo:
+            return try .cameraInfo(decodeCameraInfo(message))
         default:
             throw WireCodecError.unknownAddress(address)
         }
+    }
+
+    private static func decodeCameraInfo(_ message: OSCMessage) throws -> CameraInfo {
+        var reader = ValueReader(address: message.addressPattern.stringValue, values: message.values)
+        return try CameraInfo(
+            width: reader.int32(),
+            height: reader.int32(),
+            orientationDegrees: reader.int32(),
+            facing: reader.int32()
+        )
     }
 
     private static func decodeKeypoints<D: Sendable & Equatable>(

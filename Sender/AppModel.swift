@@ -53,6 +53,7 @@ final class AppModel {
     /// Push current settings into the pipeline. Call after any settings change.
     func applySettings() {
         oscSender.setDestination(host: settings.host, port: settings.port)
+        camera.setOrientationLock(settings.cameraOrientation)
         let config = settings.detectorConfig
         Task { [processor] in
             await processor?.setConfig(config)

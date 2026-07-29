@@ -15,7 +15,7 @@ struct StatusBarView: View {
             Text(destinationLabel)
                 .font(.system(.footnote, design: .monospaced))
             Spacer()
-            Text("\(model.processedFPS, format: .number.precision(.fractionLength(0))) fps")
+            Text(dimensionsAndRateLabel)
                 .font(.system(.footnote, design: .monospaced))
         }
         .padding(8)
@@ -27,5 +27,12 @@ struct StatusBarView: View {
     private var destinationLabel: String {
         let host = model.settings.host.isEmpty ? "—" : model.settings.host
         return "→ \(host):\(String(model.settings.port))"
+    }
+
+    /// Shows the exact dimensions being transmitted, e.g. "720×1280 · 24 fps".
+    private var dimensionsAndRateLabel: String {
+        let fps = "\(Int(model.processedFPS)) fps"
+        guard model.overlay.width > 0 else { return fps }
+        return "\(model.overlay.width)×\(model.overlay.height) · \(fps)"
     }
 }

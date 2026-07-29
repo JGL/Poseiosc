@@ -19,6 +19,9 @@ struct FrameBox: @unchecked Sendable {
     let orientation: CGImagePropertyOrientation
     let orientedWidth: Int32
     let orientedHeight: Int32
+    /// Rotation from sensor-native landscape (0/90/180/270), for /camerainfo.
+    let rotationDegrees: Int32
+    let isFrontCamera: Bool
 }
 
 final class FrameConveyor: Sendable {

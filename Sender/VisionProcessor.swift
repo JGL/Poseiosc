@@ -55,6 +55,14 @@ actor VisionProcessor {
         let started = ContinuousClock.now
         var snapshot = OverlaySnapshot(width: frame.orientedWidth, height: frame.orientedHeight)
 
+        // Camera geometry first, so receivers can interpret what follows.
+        sender.send(WireCodec.encodeCameraInfo(CameraInfo(
+            width: frame.orientedWidth,
+            height: frame.orientedHeight,
+            orientationDegrees: frame.rotationDegrees,
+            facing: frame.isFrontCamera ? 1 : 0
+        )))
+
         // Each run* method awaits Vision off-actor; the actor is free to
         // interleave, so enabled requests execute concurrently.
         async let poses = cfg.poses ? runBody(frame) : nil

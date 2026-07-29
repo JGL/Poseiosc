@@ -32,13 +32,15 @@ enum FrameKind: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    static func from(_ decoded: DecodedFrame) -> FrameKind {
+    /// nil for non-drawable messages (/camerainfo).
+    static func from(_ decoded: DecodedFrame) -> FrameKind? {
         switch decoded {
         case .poses: .poses
         case .hands: .hands
         case .faces: .faces
         case .texts: .texts
         case .animals: .animals
+        case .cameraInfo: nil
         }
     }
 }

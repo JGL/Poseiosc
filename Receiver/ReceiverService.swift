@@ -16,6 +16,8 @@ struct ReceiverSnapshot: Sendable {
     var rates: [FrameKind: Double]
     var newLogEntries: [LogEntry]
     var totalMessages: UInt64
+    var cameraInfo: CameraInfo?
+    var cameraInfoSeenAt: Date?
 }
 
 final class ReceiverService: Sendable {
@@ -26,6 +28,8 @@ final class ReceiverService: Sendable {
         var lastLogTimes: [FrameKind: Date] = [:]
         var totalMessages: UInt64 = 0
         var nextLogID: UInt64 = 0
+        var cameraInfo: CameraInfo?
+        var cameraInfoSeenAt: Date?
     }
 
     private let state = OSAllocatedUnfairLock(initialState: State())
@@ -79,15 +83,27 @@ final class ReceiverService: Sendable {
                 latest: s.latest,
                 rates: rates,
                 newLogEntries: entries,
-                totalMessages: s.totalMessages
+                totalMessages: s.totalMessages,
+                cameraInfo: s.cameraInfo,
+                cameraInfoSeenAt: s.cameraInfoSeenAt
             )
         }
     }
 
     private func handle(message: OSCMessage, from host: String) {
         guard let decoded = try? WireCodec.decode(message) else { return }
-        let kind = FrameKind.from(decoded)
         let now = Date.now
+
+        guard let kind = FrameKind.from(decoded) else {
+            if case .cameraInfo(let info) = decoded {
+                state.withLock { s in
+                    s.totalMessages += 1
+                    s.cameraInfo = info
+                    s.cameraInfoSeenAt = now
+                }
+            }
+            return
+        }
         let count = detectionCount(of: decoded)
 
         state.withLock { s in
@@ -117,6 +133,7 @@ final class ReceiverService: Sendable {
         case .faces(let f): f.detections.count
         case .texts(let f): f.detections.count
         case .animals(let f): f.detections.count
+        case .cameraInfo: 0
         }
     }
 }
