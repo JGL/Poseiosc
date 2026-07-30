@@ -6,8 +6,8 @@ import AppKit
 let outputDir = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "."
 let size = 1024
 
-// Design-space colors. The receiver/iOS apps use the blue background; the
-// macOS sender uses the plum variant so the two Dock icons are distinct.
+// Design-space colors. The receiver uses the blue background; both sender
+// apps (iOS and macOS) use the plum variant so sender and receiver are distinct.
 var bgTop = NSColor(calibratedRed: 0.05, green: 0.09, blue: 0.13, alpha: 1)
 var bgBottom = NSColor(calibratedRed: 0.08, green: 0.19, blue: 0.27, alpha: 1)
 let senderBgTop = NSColor(calibratedRed: 0.09, green: 0.05, blue: 0.15, alpha: 1)
@@ -171,12 +171,6 @@ func writePNG(_ image: CGImage, to path: String) {
     print("wrote \(path)")
 }
 
-// iOS: full-bleed square (system applies its own mask).
-let iosCtx = makeContext(size)
-fillBackground(iosCtx, rect: CGRect(x: 0, y: 0, width: size, height: size), rounded: 0)
-drawArt(iosCtx, rect: CGRect(x: 0, y: 0, width: size, height: size))
-writePNG(iosCtx.makeImage()!, to: "\(outputDir)/AppIcon-iOS-1024.png")
-
 // macOS: Big Sur-style squircle with margin on transparent canvas.
 func renderMacIcon(filename: String) {
     let macCtx = makeContext(size)
@@ -207,3 +201,9 @@ artMode = .sending
 bgTop = senderBgTop
 bgBottom = senderBgBottom
 renderMacIcon(filename: "AppIcon-macOS-sender-1024.png")
+
+// iOS sender icon: same plum palette, full-bleed square (system applies its own mask).
+let iosCtx = makeContext(size)
+fillBackground(iosCtx, rect: CGRect(x: 0, y: 0, width: size, height: size), rounded: 0)
+drawArt(iosCtx, rect: CGRect(x: 0, y: 0, width: size, height: size))
+writePNG(iosCtx.makeImage()!, to: "\(outputDir)/AppIcon-iOS-1024.png")
