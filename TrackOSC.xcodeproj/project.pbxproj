@@ -62,10 +62,10 @@
 
 /* Begin PBXFileReference section */
 		018F41691E7A33C8E6E98248 /* PoseioscSenderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseioscSenderApp.swift; sourceTree = "<group>"; };
-		02FBA07B38AB1625642180D0 /* PoseioscSenderMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = PoseioscSenderMac.app; path = TrackOSCSender.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		03807F39A230F25D975DAC80 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		044FC8024A8B6744C7E677C2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0FCA4347894328D3107380D0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		11C58630B69B8B431316A046 /* TrackOSC.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TrackOSC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		14831F8759CB808A50B99626 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		16BDA48C2E84E59039EAF4B9 /* PoseioscSenderMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseioscSenderMacApp.swift; sourceTree = "<group>"; };
 		1E180D1324327865CBF54DB9 /* ObservationMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationMapping.swift; sourceTree = "<group>"; };
@@ -79,7 +79,7 @@
 		3873AC66AD6991EB0F5F89B5 /* VisionAngle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionAngle.swift; sourceTree = "<group>"; };
 		3FEFBCE031E1972E63A30199 /* DetectorChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetectorChip.swift; sourceTree = "<group>"; };
 		40B24378FCA4958CC6C67878 /* MacAppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacAppModel.swift; sourceTree = "<group>"; };
-		43812415DB456C47561F7F15 /* PoseioscShared */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PoseioscShared; sourceTree = SOURCE_ROOT; };
+		43812415DB456C47561F7F15 /* PoseioscShared */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PoseioscShared; path = PoseioscShared; sourceTree = SOURCE_ROOT; };
 		4CE862C0CD72CC6015830132 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		530A6F40C76AC8E1B770F370 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 		5811FE8746B64C33EE554C13 /* MacCameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacCameraManager.swift; sourceTree = "<group>"; };
@@ -87,15 +87,16 @@
 		632C0DB0542BE2D695BC5D2E /* MacSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSettingsStore.swift; sourceTree = "<group>"; };
 		6A8D53A59285A22D1436833A /* CameraOrientationSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraOrientationSetting.swift; sourceTree = "<group>"; };
 		6B8A575252223D6F4E4880C1 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		6DBA3CC5FB854CD71D3810E4 /* TrackOSCSender.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrackOSCSender.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		70447DEDDBD809829F414AB4 /* FrameConveyor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameConveyor.swift; sourceTree = "<group>"; };
 		73BF246A8EDA6004AE9CB0CA /* MacCameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacCameraPreviewView.swift; sourceTree = "<group>"; };
 		8BE01430EF3AD6073346F5DA /* ControlBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBarView.swift; sourceTree = "<group>"; };
 		8F01314D4D2BB20D1A9AA995 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		9E45479FF452611FE8BF4D21 /* TrackOSC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrackOSC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E642C8E274B338B0A9BE95F /* PoseioscReceiverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseioscReceiverApp.swift; sourceTree = "<group>"; };
 		A47E5298E4628C7ED98EC8ED /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A49223DA900A20D766094DB6 /* VisualizerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizerView.swift; sourceTree = "<group>"; };
 		AAB2651F0CD22279ABBAE118 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+		B703E50BF1CBFE19E73F0DA6 /* TrackOSCReceiver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrackOSCReceiver.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B819CD68EA4B13B83875A8FE /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
 		BD3C524FDFE54A15AF2F4FE7 /* MacContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacContentView.swift; sourceTree = "<group>"; };
 		C1E70D787D793EDCC6179AEE /* OSCSenderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSCSenderService.swift; sourceTree = "<group>"; };
@@ -104,7 +105,6 @@
 		D4BB6041EDA4F90281819196 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		DC3D7CD08642E802F1B7F668 /* StatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
 		EA84C5C3CA310524FA61766A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		F1E064519A43463920E2B061 /* TrackOSCReceiver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrackOSCReceiver.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FFB8A3D2E06DFAE74EFD04A8 /* ReceiverService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiverService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -181,9 +181,9 @@
 		8B5C384F2A518B632439F32C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F1E064519A43463920E2B061 /* TrackOSCReceiver.app */,
-				9E45479FF452611FE8BF4D21 /* TrackOSC.app */,
-				02FBA07B38AB1625642180D0 /* PoseioscSenderMac.app */,
+				11C58630B69B8B431316A046 /* TrackOSC.app */,
+				B703E50BF1CBFE19E73F0DA6 /* TrackOSCReceiver.app */,
+				6DBA3CC5FB854CD71D3810E4 /* TrackOSCSender.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -291,7 +291,7 @@
 				DC8182587B6E0AEAD535D789 /* PoseioscShared */,
 			);
 			productName = PoseioscSender;
-			productReference = 9E45479FF452611FE8BF4D21 /* TrackOSC.app */;
+			productReference = 11C58630B69B8B431316A046 /* TrackOSC.app */;
 			productType = "com.apple.product-type.application";
 		};
 		0A9C019024B689D94BB76BF2 /* PoseioscSenderMac */ = {
@@ -312,7 +312,7 @@
 				D9C35C7B8BEDADE26B92F049 /* PoseioscShared */,
 			);
 			productName = PoseioscSenderMac;
-			productReference = 02FBA07B38AB1625642180D0 /* PoseioscSenderMac.app */;
+			productReference = 6DBA3CC5FB854CD71D3810E4 /* TrackOSCSender.app */;
 			productType = "com.apple.product-type.application";
 		};
 		85ACB73958B8915EC4F073B9 /* PoseioscReceiver */ = {
@@ -333,7 +333,7 @@
 				3D1DFD7A45B58CCEBD9C5828 /* PoseioscShared */,
 			);
 			productName = PoseioscReceiver;
-			productReference = F1E064519A43463920E2B061 /* TrackOSCReceiver.app */;
+			productReference = B703E50BF1CBFE19E73F0DA6 /* TrackOSCReceiver.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -346,6 +346,7 @@
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					0027B314DDFC4253CD14F253 = {
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					0A9C019024B689D94BB76BF2 = {
@@ -353,6 +354,7 @@
 						ProvisioningStyle = Automatic;
 					};
 					85ACB73958B8915EC4F073B9 = {
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -549,7 +551,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
@@ -639,7 +641,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";

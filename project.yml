@@ -37,12 +37,18 @@ settings:
     # Shared by both apps. Bump CURRENT_PROJECT_VERSION for every TestFlight
     # upload; MARKETING_VERSION is the user-facing version and release tag.
     MARKETING_VERSION: "1.2.0"
-    CURRENT_PROJECT_VERSION: "6"
+    CURRENT_PROJECT_VERSION: "7"
 
 targets:
   PoseioscSender:
     type: application
     platform: iOS
+    # Product renamed to TrackOSC; target name (and therefore the bundle
+    # ID, which App Store Connect is keyed on) deliberately unchanged.
+    # Both keys are needed: productName names the generated product
+    # references (so Xcode doesn't rewrite them), but this XcodeGen doesn't
+    # derive the PRODUCT_NAME build setting from it, so set that too.
+    productName: TrackOSC
     sources: [Sender, SenderCore]
     dependencies:
       - package: swift-osc
@@ -72,13 +78,14 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        # Product renamed to TrackOSC; target name (and therefore the bundle
-        # ID, which App Store Connect is keyed on) deliberately unchanged.
         PRODUCT_NAME: TrackOSC
 
   PoseioscSenderMac:
     type: application
     platform: macOS
+    # Product renamed; target name (bundle ID, TCC grants) unchanged.
+    # Paired with PRODUCT_NAME in settings — see the iOS sender note.
+    productName: TrackOSCSender
     sources: [SenderMac, SenderCore]
     dependencies:
       - package: swift-osc
@@ -99,7 +106,6 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
-        # Product renamed; target name (bundle ID, TCC grants) unchanged.
         PRODUCT_NAME: TrackOSCSender
     entitlements:
       path: SenderMac/PoseioscSenderMac.entitlements
@@ -113,6 +119,9 @@ targets:
   PoseioscReceiver:
     type: application
     platform: macOS
+    # Product renamed; target name (bundle ID, TCC grants) unchanged.
+    # Paired with PRODUCT_NAME in settings — see the iOS sender note.
+    productName: TrackOSCReceiver
     sources: [Receiver]
     dependencies:
       - package: swift-osc
@@ -135,7 +144,6 @@ targets:
         # equivalent, so they stay in the entitlements file.
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
-        # Product renamed; target name (bundle ID, TCC grants) unchanged.
         PRODUCT_NAME: TrackOSCReceiver
     entitlements:
       path: Receiver/PoseioscReceiver.entitlements
