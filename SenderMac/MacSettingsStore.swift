@@ -1,15 +1,17 @@
 //
-//  SettingsStore.swift
-//  Poseiosc Sender (iOS)
+//  MacSettingsStore.swift
+//  Poseiosc Sender (macOS)
 //
-//  Destination + detector settings, persisted in UserDefaults.
+//  Destination, detector, camera, and display settings, persisted in
+//  UserDefaults. Mirrors the iOS SettingsStore, with a selectable camera and
+//  a fixed rotation instead of the iOS orientation lock.
 //
 
 import Foundation
 import Observation
 
 @Observable @MainActor
-final class SettingsStore {
+final class MacSettingsStore {
     var host: String { didSet { defaults.set(host, forKey: "oscHost") } }
     var port: UInt16 { didSet { defaults.set(Int(port), forKey: "oscPort") } }
 
@@ -19,15 +21,14 @@ final class SettingsStore {
     var detectTexts: Bool { didSet { defaults.set(detectTexts, forKey: "detectTexts") } }
     var detectAnimals: Bool { didSet { defaults.set(detectAnimals, forKey: "detectAnimals") } }
 
-    var useFrontCamera: Bool { didSet { defaults.set(useFrontCamera, forKey: "useFrontCamera") } }
+    /// Selected camera's AVCaptureDevice.uniqueID (nil = system default).
+    var cameraID: String? { didSet { defaults.set(cameraID, forKey: "cameraID") } }
 
-    /// Mirrors the on-screen preview and overlay in selfie mode so it feels
-    /// like a mirror. Display-only: OSC coordinates are always unmirrored.
-    var mirrorFrontPreview: Bool { didSet { defaults.set(mirrorFrontPreview, forKey: "mirrorFrontPreview") } }
+    /// Physical rotation of the camera rig: 0, 90, 180, or 270 degrees.
+    var rotationDegrees: Int { didSet { defaults.set(rotationDegrees, forKey: "rotationDegrees") } }
 
-    var cameraOrientation: CameraOrientationSetting {
-        didSet { defaults.set(cameraOrientation.rawValue, forKey: "cameraOrientation") }
-    }
+    /// Mirrors the on-screen preview (display-only; wire data is unmirrored).
+    var mirrorPreview: Bool { didSet { defaults.set(mirrorPreview, forKey: "mirrorPreview") } }
 
     private let defaults = UserDefaults.standard
 
@@ -45,10 +46,11 @@ final class SettingsStore {
         detectFaces = bool("detectFaces", default: true)
         detectTexts = bool("detectTexts", default: false)
         detectAnimals = bool("detectAnimals", default: false)
-        useFrontCamera = bool("useFrontCamera", default: true)
-        mirrorFrontPreview = bool("mirrorFrontPreview", default: true)
-        let storedOrientation = defaults.object(forKey: "cameraOrientation") as? Int
-        cameraOrientation = storedOrientation.flatMap(CameraOrientationSetting.init(rawValue:)) ?? .auto
+        mirrorPreview = bool("mirrorPreview", default: true)
+
+        cameraID = defaults.string(forKey: "cameraID")
+        let storedRotation = defaults.integer(forKey: "rotationDegrees")
+        rotationDegrees = [0, 90, 180, 270].contains(storedRotation) ? storedRotation : 0
     }
 
     var detectorConfig: DetectorConfig {

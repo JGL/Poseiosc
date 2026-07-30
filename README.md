@@ -1,20 +1,20 @@
-# Poseiosc
+# TrackOSC
 
 A Swift app for iOS that outputs (almost) all Apple Vision framework detection
 results via OSC — body poses, hand poses, face landmarks, text, and animals —
 plus a macOS receiver app that visualizes the incoming data, so you can point
 your iPhone at the world and watch the tracking arrive on your Mac.
 
-Poseiosc is a native-Swift successor to
+TrackOSC (formerly Poseiosc) is a native-Swift successor to
 [VisionOSC](https://github.com/LingDong-/VisionOSC) by LingDong-
 (itself a successor to [PoseOSC](https://github.com/LingDong-/PoseOSC)) and
 speaks **exactly the same OSC wire format**, so existing VisionOSC/PoseOSC
 receivers (Processing, TouchDesigner, Max/MSP, openFrameworks…) work unchanged.
 
-- **PoseioscSender** (iOS 18+, SwiftUI): live camera → Vision → OSC over UDP,
+- **TrackOSC** for iOS (iOS 18+, SwiftUI): live camera → Vision → OSC over UDP,
   with on-screen tracking overlays, per-detector toggles, front/back camera
   switch, and Bonjour discovery of receivers.
-- **PoseioscReceiver** (macOS 15+, SwiftUI): listens on UDP (default port
+- **TrackOSC Receiver** (macOS 15+, SwiftUI): listens on UDP (default port
   9527), draws skeletons/landmarks/boxes, shows per-address message rates and
   a log, and advertises itself on the local network so the phone can find it.
 
@@ -23,10 +23,19 @@ developer account.
 
 ## Quick start without building anything
 
-- **Mac receiver**: download `PoseioscReceiver-<version>-macOS.zip` from the
-  [Releases page](https://github.com/JGL/Poseiosc/releases), unzip, and open.
-  The app is signed and notarized, so there are no Gatekeeper hoops — just
-  allow the **Local Network** prompt on first launch.
+All downloads are signed and notarized — no Gatekeeper hoops.
+
+- **Mac receiver**: download `TrackOSCReceiver-<version>-macOS.zip` from the
+  [Releases page](https://github.com/JGL/TrackOSC/releases), unzip, and open.
+  Allow the **Local Network** prompt on first launch.
+- **Mac sender**: download `TrackOSCSender-<version>-macOS.zip` from the same
+  Releases page — the full tracking pipeline running on a Mac camera
+  (built-in, external webcam, or your iPhone via Continuity Camera). Allow
+  the **Camera** and **Local Network** prompts. Pick the camera, a rig
+  rotation (for cameras mounted sideways), and the destination in its
+  settings — receivers on the network appear automatically. To try
+  everything on one Mac, run sender and receiver together and send to
+  `127.0.0.1`.
 - **iPhone sender**: install via the TestFlight link (ask the maintainer),
   using the free [TestFlight app](https://apps.apple.com/app/testflight/id899247664).
 
@@ -47,8 +56,8 @@ All dependencies are Swift Packages resolved automatically by Xcode
 
 ## Building the macOS receiver
 
-1. Open `Poseiosc.xcodeproj` in Xcode.
-2. Select the **PoseioscReceiver** scheme, destination **My Mac**.
+1. Open `TrackOSC.xcodeproj` in Xcode.
+2. Select the **TrackOSCReceiver** scheme, destination **My Mac**.
 3. Signing: Xcode may ask you to pick a team — go to the target's
    **Signing & Capabilities** tab and select your team (personal is fine).
 4. Run (⌘R).
@@ -61,14 +70,16 @@ it's advertising. You can change the port and press **Restart**.
 
 ## Building the iOS sender
 
-1. In the same project, select the **PoseioscSender** scheme and your iPhone
+1. In the same project, select the **TrackOSCSender** scheme and your iPhone
    as the destination (connect it by cable the first time).
 2. In the **PoseioscSender** target's **Signing & Capabilities** tab, select
-   your team. If you're building from source (rather than installing via
-   TestFlight), also change the bundle identifier prefix
-   `com.joelgethinlewis` to something of your own (e.g.
-   `com.yourname.poseiosc`) — either in Signing & Capabilities, or by
-   editing `bundleIdPrefix` in `project.yml` and running
+   your team. (Target and bundle-ID names keep the historical "Poseiosc" —
+   bundle IDs are welded to App Store Connect and to users' granted
+   permissions, so they deliberately never changed with the rename.) If
+   you're building from source rather than installing via TestFlight, also
+   change the bundle identifier prefix `com.joelgethinlewis` to something of
+   your own (e.g. `com.yourname.trackosc`) — either in Signing &
+   Capabilities, or by editing `bundleIdPrefix` in `project.yml` and running
    `xcodegen generate`.
 3. Run (⌘R). With a free developer account the app must be re-signed every
    7 days; paid accounts get a year.
@@ -77,7 +88,7 @@ it's advertising. You can change the port and press **Restart**.
 5. First launch prompts: allow **Camera**, and allow **Local Network**
    (needed both for Bonjour discovery and for sending UDP to your Mac).
    If you decline Local Network by accident: Settings → Privacy & Security →
-   Local Network → enable Poseiosc.
+   Local Network → enable TrackOSC.
 
 ## Using it
 
@@ -143,10 +154,10 @@ no Xcode needed on their side.
 One-time setup:
 
 1. Sign in at [App Store Connect](https://appstoreconnect.apple.com) →
-   **Apps → ＋ → New App**: platform iOS, a name (e.g. "Poseiosc"), your
+   **Apps → ＋ → New App**: platform iOS, a name (e.g. "TrackOSC"), your
    bundle ID (register it under **Certificates, IDs & Profiles** or let
    Xcode's signing pane register it first), any SKU string.
-2. In Xcode, select the **PoseioscSender** scheme with your team set.
+2. In Xcode, select the **TrackOSCSender** scheme with your team set.
 
 Per release:
 
@@ -170,12 +181,12 @@ The project already sets `ITSAppUsesNonExemptEncryption` to false (the app
 contains no custom cryptography), so uploads skip the export-compliance
 question.
 
-## Releasing the receiver (maintainers)
+## Releasing the macOS apps (maintainers)
 
-`Scripts/release-receiver.sh` archives the macOS receiver, signs it with your
-Developer ID, notarizes and staples it, and publishes the zip as a GitHub
-Release — so end users can download and double-click with no Gatekeeper
-friction.
+`Scripts/release.sh` archives **both** macOS apps (receiver and sender),
+signs them with your Developer ID, notarizes and staples them, and publishes
+the zips as one GitHub Release — so end users can download and double-click
+with no Gatekeeper friction.
 
 One-time setup:
 
@@ -194,7 +205,7 @@ Then, per release — bump `MARKETING_VERSION` in `project.yml`, run
 `xcodegen generate`, commit, and:
 
 ```bash
-POSEIOSC_TEAM_ID=YOURTEAMID Scripts/release-receiver.sh
+POSEIOSC_TEAM_ID=YOURTEAMID Scripts/release.sh
 ```
 
 Add `--dry-run` to build/notarize without publishing.
@@ -223,7 +234,7 @@ Everything on the wire uses one convention — the same one VisionOSC uses:
   special-casing:
 
 ```java
-// Processing: map a Poseiosc point into your sketch window
+// Processing: map a TrackOSC point into your sketch window
 float sx = x / frameW * width;   // frameW/frameH from the message header
 float sy = y / frameH * height;
 ```
@@ -237,7 +248,7 @@ Byte-compatible with VisionOSC. All messages are sent unbundled over UDP, one
 per enabled detector per processed frame, **including when nothing is
 detected** (header-only). Coordinates are as described above.
 
-**`/camerainfo`** (Poseiosc addition; VisionOSC receivers ignore it) —
+**`/camerainfo`** (TrackOSC addition; VisionOSC receivers ignore it) —
 sent with every processed frame:
 
 | # | Type | Value |
@@ -283,11 +294,15 @@ confidence=0` (VisionOSC's convention) — filter on `confidence == 0`.
 
 ```
 project.yml            XcodeGen spec (source of truth for the Xcode project)
-Poseiosc.xcodeproj     Generated project (committed; users just open it)
+TrackOSC.xcodeproj     Generated project (committed; users just open it)
 PoseioscShared/        Swift package: wire format codec, models, skeleton
                        edge lists, coordinate mapping, CLI test tools, tests
-Sender/                iOS app (camera, Vision pipeline, overlays, Bonjour browse)
-Receiver/              macOS app (OSC server, visualizer, log, Bonjour advertise)
+SenderCore/            Platform-neutral sender pipeline shared by both
+                       senders (Vision processing, OSC, Bonjour, overlay)
+Sender/                iOS sender app shell (camera, rotation, UI)
+SenderMac/             macOS sender app shell (camera picker, rig rotation)
+Receiver/              macOS receiver (OSC server, visualizer, log, Bonjour)
+Scripts/               Notarized-release tooling
 PROMPTS_AND_DECISIONS.md   Running record of prompts and design decisions
 ```
 
@@ -303,7 +318,7 @@ contract. Run tests with `cd PoseioscShared && swift test`.
   Many guest/campus/hotel networks enable *client isolation*, which blocks
   device-to-device traffic entirely; use a private network or a personal
   hotspot. Check Local Network permission on **both** devices, and that the
-  Mac's firewall allowed PoseioscReceiver. Verify the Mac is advertising:
+  Mac's firewall allowed TrackOSC Receiver. Verify the Mac is advertising:
   `dns-sd -B _osc._udp local.`
 - **Discovered receiver won't resolve** — enter the Mac's IP manually
   (System Settings → Wi-Fi → Details → IP address).

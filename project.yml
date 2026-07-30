@@ -1,10 +1,10 @@
-# Poseiosc — XcodeGen project spec (source of truth for Poseiosc.xcodeproj).
+# TrackOSC — XcodeGen project spec (source of truth for TrackOSC.xcodeproj).
 #
-# The generated Poseiosc.xcodeproj is committed so end users only need Xcode.
+# The generated TrackOSC.xcodeproj is committed so end users only need Xcode.
 # After adding/removing source files, regenerate with:
 #   xcodegen generate
 
-name: Poseiosc
+name: TrackOSC
 options:
   bundleIdPrefix: com.joelgethinlewis
   deploymentTarget:
@@ -36,14 +36,14 @@ settings:
     STRING_CATALOG_GENERATE_SYMBOLS: YES
     # Shared by both apps. Bump CURRENT_PROJECT_VERSION for every TestFlight
     # upload; MARKETING_VERSION is the user-facing version and release tag.
-    MARKETING_VERSION: "1.1.0"
-    CURRENT_PROJECT_VERSION: "5"
+    MARKETING_VERSION: "1.2.0"
+    CURRENT_PROJECT_VERSION: "6"
 
 targets:
   PoseioscSender:
     type: application
     platform: iOS
-    sources: [Sender]
+    sources: [Sender, SenderCore]
     dependencies:
       - package: swift-osc
         product: SwiftOSC
@@ -52,14 +52,14 @@ targets:
     info:
       path: Sender/Info.plist
       properties:
-        CFBundleDisplayName: Poseiosc
+        CFBundleDisplayName: TrackOSC
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         # Standard-encryption-only exemption: skips the export compliance
         # question on every TestFlight upload.
         ITSAppUsesNonExemptEncryption: false
         NSCameraUsageDescription: "Camera frames are analyzed on-device to detect bodies, hands, faces, text, and animals. No video leaves the phone — only OSC tracking data."
-        NSLocalNetworkUsageDescription: "Poseiosc sends OSC tracking data to receivers on your local network and browses for them via Bonjour."
+        NSLocalNetworkUsageDescription: "TrackOSC sends OSC tracking data to receivers on your local network and browses for them via Bonjour."
         NSBonjourServices: ["_osc._udp"]
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
@@ -72,6 +72,43 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # Product renamed to TrackOSC; target name (and therefore the bundle
+        # ID, which App Store Connect is keyed on) deliberately unchanged.
+        PRODUCT_NAME: TrackOSC
+
+  PoseioscSenderMac:
+    type: application
+    platform: macOS
+    sources: [SenderMac, SenderCore]
+    dependencies:
+      - package: swift-osc
+        product: SwiftOSC
+      - package: PoseioscShared
+        product: PoseioscShared
+    info:
+      path: SenderMac/Info.plist
+      properties:
+        CFBundleDisplayName: TrackOSC Sender
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSCameraUsageDescription: "Camera frames are analyzed on-device to detect bodies, hands, faces, text, and animals. No video leaves this Mac — only OSC tracking data."
+        NSLocalNetworkUsageDescription: "TrackOSC Sender sends OSC tracking data to receivers on your local network and browses for them via Bonjour."
+        NSBonjourServices: ["_osc._udp"]
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        # Product renamed; target name (bundle ID, TCC grants) unchanged.
+        PRODUCT_NAME: TrackOSCSender
+    entitlements:
+      path: SenderMac/PoseioscSenderMac.entitlements
+      properties:
+        com.apple.security.device.camera: true
+        com.apple.security.network.client: true
+        # Required to BIND the UDP socket the OSC client sends from —
+        # without it the sandbox silently blocks sending entirely.
+        com.apple.security.network.server: true
 
   PoseioscReceiver:
     type: application
@@ -85,10 +122,10 @@ targets:
     info:
       path: Receiver/Info.plist
       properties:
-        CFBundleDisplayName: Poseiosc Receiver
+        CFBundleDisplayName: TrackOSC Receiver
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        NSLocalNetworkUsageDescription: "Poseiosc Receiver listens for OSC tracking data and advertises itself on your local network via Bonjour."
+        NSLocalNetworkUsageDescription: "TrackOSC Receiver listens for OSC tracking data and advertises itself on your local network via Bonjour."
         NSBonjourServices: ["_osc._udp"]
     settings:
       base:
@@ -98,6 +135,8 @@ targets:
         # equivalent, so they stay in the entitlements file.
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
+        # Product renamed; target name (bundle ID, TCC grants) unchanged.
+        PRODUCT_NAME: TrackOSCReceiver
     entitlements:
       path: Receiver/PoseioscReceiver.entitlements
       properties:
@@ -105,13 +144,19 @@ targets:
         com.apple.security.network.client: true
 
 schemes:
-  PoseioscSender:
+  TrackOSCSender:
     build:
       targets:
         PoseioscSender: all
     run:
       config: Debug
-  PoseioscReceiver:
+  TrackOSCSenderMac:
+    build:
+      targets:
+        PoseioscSenderMac: all
+    run:
+      config: Debug
+  TrackOSCReceiver:
     build:
       targets:
         PoseioscReceiver: all

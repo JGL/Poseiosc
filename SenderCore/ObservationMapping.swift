@@ -91,22 +91,25 @@ enum ObservationMapping {
         width: Int32,
         height: Int32
     ) -> DetectionFrame<FaceDetection> {
-        let w = Float(width), h = Float(height)
         let detections = observations.prefix(WireCounts.maxDetections).compactMap { observation -> FaceDetection? in
             guard let allPoints = observation.landmarks?.allPoints else { return nil }
-            let landmarkPoints = allPoints.points
-            guard landmarkPoints.count == WireCounts.facePoints else { return nil }
+
+            // Don't assume anything about the landmarks' normalization basis
+            // (it is NOT documented in the public interface): let Vision
+            // itself convert to image pixels, requesting the wire format's
+            // upper-left origin directly.
+            let imagePoints = allPoints.pointsInImageCoordinates(
+                CGSize(width: CGFloat(width), height: CGFloat(height)),
+                origin: .upperLeft
+            )
+            guard imagePoints.count == WireCounts.facePoints else { return nil }
 
             let precisions = allPoints.precisionEstimatesPerPoint
-            let boundingBox = observation.boundingBox.cgRect
-
-            let points = landmarkPoints.enumerated().map { index, point in
-                CoordinateMapper.faceLandmarkPoint(
-                    pointInBox: CGPoint(x: point.x, y: point.y),
-                    boundingBox: boundingBox,
-                    precision: precisions.flatMap { index < $0.count ? Float($0[index]) : nil } ?? observation.confidence,
-                    frameWidth: w,
-                    frameHeight: h
+            let points = imagePoints.enumerated().map { index, point in
+                WirePoint(
+                    x: Float(point.x),
+                    y: Float(point.y),
+                    confidence: precisions.flatMap { index < $0.count ? Float($0[index]) : nil } ?? observation.confidence
                 )
             }
             return FaceDetection(confidence: observation.confidence, points: points)

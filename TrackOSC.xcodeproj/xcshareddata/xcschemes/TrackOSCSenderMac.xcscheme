@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "16A518979B61401034F44EE7"
-               BuildableName = "PoseioscSender.app"
-               BlueprintName = "PoseioscSender"
-               ReferencedContainer = "container:Poseiosc.xcodeproj">
+               BlueprintIdentifier = "0A9C019024B689D94BB76BF2"
+               BuildableName = "PoseioscSenderMac.app"
+               BlueprintName = "PoseioscSenderMac"
+               ReferencedContainer = "container:TrackOSC.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "16A518979B61401034F44EE7"
-            BuildableName = "PoseioscSender.app"
-            BlueprintName = "PoseioscSender"
-            ReferencedContainer = "container:Poseiosc.xcodeproj">
+            BlueprintIdentifier = "0A9C019024B689D94BB76BF2"
+            BuildableName = "PoseioscSenderMac.app"
+            BlueprintName = "PoseioscSenderMac"
+            ReferencedContainer = "container:TrackOSC.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -55,10 +55,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "16A518979B61401034F44EE7"
-            BuildableName = "PoseioscSender.app"
-            BlueprintName = "PoseioscSender"
-            ReferencedContainer = "container:Poseiosc.xcodeproj">
+            BlueprintIdentifier = "0A9C019024B689D94BB76BF2"
+            BuildableName = "PoseioscSenderMac.app"
+            BlueprintName = "PoseioscSenderMac"
+            ReferencedContainer = "container:TrackOSC.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -74,10 +74,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "16A518979B61401034F44EE7"
-            BuildableName = "PoseioscSender.app"
-            BlueprintName = "PoseioscSender"
-            ReferencedContainer = "container:Poseiosc.xcodeproj">
+            BlueprintIdentifier = "0A9C019024B689D94BB76BF2"
+            BuildableName = "PoseioscSenderMac.app"
+            BlueprintName = "PoseioscSenderMac"
+            ReferencedContainer = "container:TrackOSC.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -171,14 +171,6 @@ final class CameraManager: NSObject, @unchecked Sendable {
         return Int32(lock.rawValue)
     }
 
-    private static func visionOrientation(forAngle angle: Int32) -> CGImagePropertyOrientation {
-        switch angle {
-        case 90: .right
-        case 180: .down
-        case 270: .left
-        default: .up
-        }
-    }
 }
 
 extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
@@ -193,12 +185,11 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
         else { return }
 
         let angle = currentCaptureAngle()
-        let orientation = Self.visionOrientation(forAngle: angle)
+        let orientation = VisionAngle.orientation(forDegrees: angle)
         let bufferWidth = Int32(CVPixelBufferGetWidth(pixelBuffer))
         let bufferHeight = Int32(CVPixelBufferGetHeight(pixelBuffer))
 
-        // 90°/270° rotations swap the oriented dimensions.
-        let swapped = angle == 90 || angle == 270
+        let swapped = VisionAngle.isQuarterTurn(angle)
         conveyor.submit(FrameBox(
             pixelBuffer: pixelBuffer,
             orientation: orientation,

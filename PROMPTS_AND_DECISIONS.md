@@ -277,6 +277,62 @@ naming crosses over: a device rotated anticlockwise reports interface
 .landscapeRight). Fixed: .landscapeRight → 180°, .landscapeLeft → 0°.
 Build 5.
 
+## v1.2 — macOS sender app (2026-07-30)
+
+Joel's request after v1.1.0 shipped: a macOS version of the sender, notarized
+like the receiver and downloadable from GitHub Releases. Decisions:
+
+- **Shared `SenderCore/`**: the entire detection pipeline (FrameConveyor,
+  VisionProcessor, ObservationMapping, OSCSenderService, BonjourBrowser,
+  OverlayView, DetectorChip, VisionAngle helpers) was already
+  platform-neutral and moved verbatim out of `Sender/`; both sender targets
+  compile it directly. The iOS app is unchanged by construction.
+- **Mac camera model**: no auto-orientation (Mac interfaces don't rotate) —
+  instead a **rig rotation** setting (0/90/180/270°, default 0°) for cameras
+  mounted sideways, plus a **camera picker** covering built-in, external
+  webcams, and iPhone Continuity Camera, persisted by device uniqueID.
+  `/camerainfo` reports facing=front (webcams face the user).
+- Preview uses the same view-space counter-rotation pattern as iOS (base
+  angle 0 instead of 90); wire data remains unmirrored with a display-only
+  mirror toggle.
+- Sandboxed with camera + network-client entitlements; hardened runtime.
+- Icon: same skeleton artwork on a plum background (receiver stays blue) so
+  the two Dock icons are distinguishable; `Design/render_icons.swift` renders
+  all three variants.
+- **Release**: `Scripts/release.sh` replaces `release-receiver.sh` — builds,
+  notarizes, staples, and publishes BOTH mac apps as one GitHub release
+  (v1.2.0, builds bumped to 6).
+
+### v1.2 fix round + rename to TrackOSC (2026-07-30)
+
+From Joel's mac-to-mac testing:
+
+- **Mac sender sent nothing** (receiver total 0): the sandbox blocks
+  *binding* the UDP socket the OSC client sends from unless the app has the
+  `network.server` entitlement — `network.client` alone silently kills
+  sending. Added to the mac sender's entitlements.
+- **Face landmarks were systematically distorted on every platform.** Two
+  wrong attempts before the right answer: (1) the original code hand-rolled
+  the legacy bbox double-mapping — slightly off; (2) an "image-normalized"
+  theory (argued from `Landmarks2D.Region` storing no *public* bounding box)
+  scattered the constellation across the whole frame — swiftinterface files
+  hide internal storage, so the argument was unsound. Final fix: make no
+  assumption at all and use Vision's own
+  `Region.pointsInImageCoordinates(imageSize:origin:)` with `.upperLeft`,
+  which lands directly in wire space. Lesson recorded: when a framework
+  provides its own coordinate converter, use it.
+- **Receiver icon redesigned**: waves now arrive from beyond the corner with
+  an inbound arrow — the mirror of the senders' outgoing broadcast — so
+  send/receive Dock icons read differently at a glance.
+- **Project renamed Poseiosc → TrackOSC** (Joel's pick; honors the FaceOSC →
+  PoseOSC → VisionOSC lineage; no GitHub collision). Renamed: repo,
+  README/branding, product names (TrackOSC / TrackOSC Sender / TrackOSC
+  Receiver), scheme names, TrackOSC.xcodeproj, Bonjour advertisement.
+  Deliberately NOT renamed: bundle IDs (welded to the App Store Connect
+  record and to users' TCC permission grants), target names (they generate
+  the bundle IDs), the PoseioscShared package, the poseiosc-* CLI tools, and
+  the `poseiosc-notary` keychain profile.
+
 ## Verification record (2026-07-28)
 
 - `swift test` in `PoseioscShared`: 18 tests green, including round-trips for

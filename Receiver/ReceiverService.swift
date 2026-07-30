@@ -62,7 +62,7 @@ final class ReceiverService: Sendable {
 
     /// Starts Bonjour advertising; returns the advertised service name.
     func advertise(port: UInt16) throws -> String {
-        let name = "Poseiosc Receiver (\(Host.current().localizedName ?? "Mac"))"
+        let name = "TrackOSC Receiver (\(Host.current().localizedName ?? "Mac"))"
         try advertiser.start(name: name, port: port)
         return name
     }

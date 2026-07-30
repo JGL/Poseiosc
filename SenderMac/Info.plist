@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>TrackOSC</string>
+	<string>TrackOSC Sender</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -20,25 +20,13 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_osc._udp</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera frames are analyzed on-device to detect bodies, hands, faces, text, and animals. No video leaves the phone — only OSC tracking data.</string>
+	<string>Camera frames are analyzed on-device to detect bodies, hands, faces, text, and animals. No video leaves this Mac — only OSC tracking data.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>TrackOSC sends OSC tracking data to receivers on your local network and browses for them via Bonjour.</string>
-	<key>UILaunchScreen</key>
-	<dict/>
-	<key>UIRequiresFullScreen</key>
-	<true/>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
+	<string>TrackOSC Sender sends OSC tracking data to receivers on your local network and browses for them via Bonjour.</string>
 </dict>
 </plist>

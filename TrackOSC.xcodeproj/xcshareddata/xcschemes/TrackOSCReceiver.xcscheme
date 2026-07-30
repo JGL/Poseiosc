@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D536D3EEA62BF5D5B9037B4C"
+               BlueprintIdentifier = "85ACB73958B8915EC4F073B9"
                BuildableName = "PoseioscReceiver.app"
                BlueprintName = "PoseioscReceiver"
-               ReferencedContainer = "container:Poseiosc.xcodeproj">
+               ReferencedContainer = "container:TrackOSC.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D536D3EEA62BF5D5B9037B4C"
+            BlueprintIdentifier = "85ACB73958B8915EC4F073B9"
             BuildableName = "PoseioscReceiver.app"
             BlueprintName = "PoseioscReceiver"
-            ReferencedContainer = "container:Poseiosc.xcodeproj">
+            ReferencedContainer = "container:TrackOSC.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -55,10 +55,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D536D3EEA62BF5D5B9037B4C"
+            BlueprintIdentifier = "85ACB73958B8915EC4F073B9"
             BuildableName = "PoseioscReceiver.app"
             BlueprintName = "PoseioscReceiver"
-            ReferencedContainer = "container:Poseiosc.xcodeproj">
+            ReferencedContainer = "container:TrackOSC.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -74,10 +74,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D536D3EEA62BF5D5B9037B4C"
+            BlueprintIdentifier = "85ACB73958B8915EC4F073B9"
             BuildableName = "PoseioscReceiver.app"
             BlueprintName = "PoseioscReceiver"
-            ReferencedContainer = "container:Poseiosc.xcodeproj">
+            ReferencedContainer = "container:TrackOSC.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

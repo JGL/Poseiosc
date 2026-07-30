@@ -268,21 +268,6 @@ struct CoordinateMapperTests {
         #expect(abs(rect.height - 40) < 0.001)
     }
 
-    @Test func faceLandmarkDoubleMapping() {
-        // Face box occupies the top-right quadrant in image space:
-        // normalized origin (0.5, 0.5), size (0.5, 0.5). A landmark at the center
-        // of the box should land at the center of that quadrant in pixels.
-        let point = CoordinateMapper.faceLandmarkPoint(
-            pointInBox: CGPoint(x: 0.5, y: 0.5),
-            boundingBox: CGRect(x: 0.5, y: 0.5, width: 0.5, height: 0.5),
-            precision: 0.7,
-            frameWidth: 200, frameHeight: 200
-        )
-        #expect(point.x == 150)
-        #expect(point.y == 50)
-        #expect(point.confidence == 0.7)
-    }
-
     @Test func missingJointSentinelMatchesVisionOSC() {
         let missing = WirePoint.missing(frameHeight: 1920)
         #expect(missing.x == 0)

@@ -1,15 +1,16 @@
 //
-//  SettingsView.swift
-//  Poseiosc Sender (iOS)
+//  MacSettingsView.swift
+//  Poseiosc Sender (macOS)
 //
-//  Destination configuration: Bonjour-discovered receivers plus manual entry.
+//  Destination (Bonjour-discovered or manual), camera selection, rig
+//  rotation, mirror, and statistics.
 //
 
 import SwiftUI
 import PoseioscShared
 
-struct SettingsView: View {
-    @Bindable var model: AppModel
+struct MacSettingsView: View {
+    @Bindable var model: MacAppModel
     @Environment(\.dismiss) private var dismiss
 
     @State private var hostText = ""
@@ -19,16 +20,17 @@ struct SettingsView: View {
 
     var body: some View {
         @Bindable var settings = model.settings
-        NavigationStack {
+        VStack(spacing: 0) {
             Form {
                 Section("Discovered receivers") {
                     if model.bonjour.receivers.isEmpty {
                         HStack(spacing: 8) {
                             ProgressView()
+                                .controlSize(.small)
                             Text("Searching for receivers on this network…")
                                 .foregroundStyle(.secondary)
                         }
-                        .font(.footnote)
+                        .font(.callout)
                     }
                     ForEach(model.bonjour.receivers) { receiver in
                         Button {
@@ -39,48 +41,43 @@ struct SettingsView: View {
                                 Spacer()
                                 if resolvingReceiver == receiver.name {
                                     ProgressView()
+                                        .controlSize(.small)
                                 }
                             }
                         }
-                        .foregroundStyle(.primary)
+                        .buttonStyle(.plain)
                     }
                     if resolveFailed {
                         Text("Could not resolve that receiver — enter its address manually below.")
-                            .font(.footnote)
+                            .font(.callout)
                             .foregroundStyle(.red)
                     }
                 }
 
                 Section("Destination") {
-                    TextField("Host or IP (e.g. 192.168.1.20)", text: $hostText)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .keyboardType(.URL)
+                    TextField("Host or IP", text: $hostText, prompt: Text("e.g. 192.168.1.20 (or 127.0.0.1 for this Mac)"))
                     TextField("Port", text: $portText)
-                        .keyboardType(.numberPad)
-                    Button("Apply") {
-                        applyDestination()
-                    }
+                    Button("Apply", action: applyDestination)
                 }
 
                 Section("Camera") {
-                    Picker("Orientation", selection: $settings.cameraOrientation) {
-                        ForEach(CameraOrientationSetting.allCases) { setting in
-                            Text(setting.label).tag(setting)
+                    Picker("Camera", selection: cameraSelection) {
+                        ForEach(model.cameras) { camera in
+                            Text(camera.name).tag(camera.id)
                         }
                     }
-                    Text("Lock the orientation when the phone is mounted (tripod, flat rig) — automatic detection relies on gravity and fails when the phone lies flat. If a locked landscape preview appears upside down, pick the other landscape option.")
-                        .font(.footnote)
+                    Picker("Rig rotation", selection: $settings.rotationDegrees) {
+                        Text("0° (normal)").tag(0)
+                        Text("90°").tag(90)
+                        Text("180°").tag(180)
+                        Text("270°").tag(270)
+                    }
+                    Text("For cameras mounted rotated. iPhones via Continuity Camera also appear in the camera list.")
+                        .font(.callout)
                         .foregroundStyle(.secondary)
-                }
-                .onChange(of: settings.cameraOrientation) {
-                    model.applySettings()
-                }
-
-                Section("Preview") {
-                    Toggle("Mirror selfie preview", isOn: $settings.mirrorFrontPreview)
-                    Text("Front camera only. Display-only — the OSC coordinates sent to receivers are always unmirrored.")
-                        .font(.footnote)
+                    Toggle("Mirror preview", isOn: $settings.mirrorPreview)
+                    Text("Display-only — OSC coordinates are always unmirrored.")
+                        .font(.callout)
                         .foregroundStyle(.secondary)
                 }
 
@@ -90,28 +87,35 @@ struct SettingsView: View {
                     LabeledContent("Frame", value: frameDescription)
                     LabeledContent("App version", value: appVersion)
                 }
+            }
+            .formStyle(.grouped)
 
-                Section {
-                    Text("Default port 9527 matches VisionOSC. The macOS TrackOSC Receiver listens on that port; other OSC tools (TouchDesigner, Max/MSP, Processing) can receive on any port you set here.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+            Divider()
+            HStack {
+                Spacer()
+                Button("Done") {
+                    applyDestination()
+                    dismiss()
                 }
+                .keyboardShortcut(.defaultAction)
             }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        applyDestination()
-                        dismiss()
-                    }
-                }
-            }
-            .onAppear {
-                hostText = model.settings.host
-                portText = String(model.settings.port)
-            }
+            .padding(12)
         }
+        .frame(width: 480, height: 560)
+        .onAppear {
+            hostText = model.settings.host
+            portText = String(model.settings.port)
+        }
+        .onChange(of: model.settings.rotationDegrees) {
+            model.applySettings()
+        }
+    }
+
+    private var cameraSelection: Binding<String> {
+        Binding(
+            get: { model.settings.cameraID ?? model.camera.currentDeviceID ?? "" },
+            set: { model.selectCamera(id: $0) }
+        )
     }
 
     private var appVersion: String {
@@ -121,7 +125,6 @@ struct SettingsView: View {
         return "\(version) (\(build))"
     }
 
-    /// e.g. "720×1280 · 90° portrait" — mirrors what /camerainfo broadcasts.
     private var frameDescription: String {
         let snapshot = model.overlay
         guard snapshot.width > 0 else { return "—" }

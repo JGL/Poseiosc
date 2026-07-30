@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Poseiosc Receiver</string>
+	<string>TrackOSC Receiver</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -25,6 +25,6 @@
 		<string>_osc._udp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Poseiosc Receiver listens for OSC tracking data and advertises itself on your local network via Bonjour.</string>
+	<string>TrackOSC Receiver listens for OSC tracking data and advertises itself on your local network via Bonjour.</string>
 </dict>
 </plist>

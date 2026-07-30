@@ -40,24 +40,4 @@ public enum CoordinateMapper {
         )
     }
 
-    /// Convert a face landmark point that is normalized *to the face bounding box*
-    /// (as Vision provides them) to wire pixels, replicating VisionOSC's double mapping.
-    /// `boundingBox` is the face box in Vision normalized image space (origin bottom-left).
-    public static func faceLandmarkPoint(
-        pointInBox point: CGPoint,
-        boundingBox: CGRect,
-        precision: Float,
-        frameWidth: Float,
-        frameHeight: Float
-    ) -> WirePoint {
-        let boxLeft = Float(boundingBox.origin.x) * frameWidth
-        let boxTop = (1 - Float(boundingBox.origin.y) - Float(boundingBox.size.height)) * frameHeight
-        let boxWidth = Float(boundingBox.size.width) * frameWidth
-        let boxHeight = Float(boundingBox.size.height) * frameHeight
-        return WirePoint(
-            x: Float(point.x) * boxWidth + boxLeft,
-            y: (1 - Float(point.y)) * boxHeight + boxTop,
-            confidence: precision
-        )
-    }
 }

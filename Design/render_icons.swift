@@ -6,9 +6,12 @@ import AppKit
 let outputDir = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "."
 let size = 1024
 
-// Design-space colors
-let bgTop = NSColor(calibratedRed: 0.05, green: 0.09, blue: 0.13, alpha: 1)
-let bgBottom = NSColor(calibratedRed: 0.08, green: 0.19, blue: 0.27, alpha: 1)
+// Design-space colors. The receiver/iOS apps use the blue background; the
+// macOS sender uses the plum variant so the two Dock icons are distinct.
+var bgTop = NSColor(calibratedRed: 0.05, green: 0.09, blue: 0.13, alpha: 1)
+var bgBottom = NSColor(calibratedRed: 0.08, green: 0.19, blue: 0.27, alpha: 1)
+let senderBgTop = NSColor(calibratedRed: 0.09, green: 0.05, blue: 0.15, alpha: 1)
+let senderBgBottom = NSColor(calibratedRed: 0.21, green: 0.11, blue: 0.32, alpha: 1)
 let limbGreen = NSColor(calibratedRed: 0.19, green: 0.82, blue: 0.35, alpha: 1)
 let jointGreen = NSColor(calibratedRed: 0.55, green: 0.95, blue: 0.55, alpha: 1)
 let arcCyan = NSColor(calibratedRed: 0.39, green: 0.82, blue: 1.0, alpha: 1)
@@ -44,6 +47,13 @@ func fillBackground(_ ctx: CGContext, rect: CGRect, rounded radius: CGFloat) {
     )
     ctx.restoreGState()
 }
+
+enum ArtMode {
+    case sending    // arcs radiate outward from the raised hand
+    case receiving  // arcs arrive from beyond the corner, with an inbound arrow
+}
+
+var artMode = ArtMode.sending
 
 /// Draws the figure + arcs. `rect` is where the 0-1024 design space lands.
 func drawArt(_ ctx: CGContext, rect: CGRect) {
@@ -99,16 +109,56 @@ func drawArt(_ ctx: CGContext, rect: CGRect) {
         ctx.fillEllipse(in: CGRect(x: joint.x - r, y: joint.y - r, width: r * 2, height: r * 2))
     }
 
-    // OSC signal arcs radiating from the raised wrist toward the top-right corner.
-    for (index, radius) in [95.0, 155.0, 215.0].enumerated() {
-        ctx.setStrokeColor(arcCyan.withAlphaComponent(1.0 - CGFloat(index) * 0.28).cgColor)
-        ctx.setLineWidth(26 * s)
-        // Angles in flipped (top-left) space: arc opening up-right.
-        ctx.addArc(
-            center: rWrist, radius: radius * s,
-            startAngle: -0.25 * .pi, endAngle: -0.75 * .pi,
-            clockwise: true
+    switch artMode {
+    case .sending:
+        // OSC signal arcs radiating from the raised wrist toward the corner.
+        for (index, radius) in [95.0, 155.0, 215.0].enumerated() {
+            ctx.setStrokeColor(arcCyan.withAlphaComponent(1.0 - CGFloat(index) * 0.28).cgColor)
+            ctx.setLineWidth(26 * s)
+            // Angles in flipped (top-left) space: arc opening up-right.
+            ctx.addArc(
+                center: rWrist, radius: radius * s,
+                startAngle: -0.25 * .pi, endAngle: -0.75 * .pi,
+                clockwise: true
+            )
+            ctx.strokePath()
+        }
+
+    case .receiving:
+        // Waves arriving from a source beyond the top-right corner: arcs
+        // centered out there, bowing toward the figure, strongest nearest
+        // the hand, plus an inbound arrow.
+        let source = pt(1050, -110)
+        let towardWrist = atan2(rWrist.y - source.y, rWrist.x - source.x)
+        for (index, radius) in [420.0, 340.0, 260.0].enumerated() {
+            ctx.setStrokeColor(arcCyan.withAlphaComponent(0.44 + CGFloat(index) * 0.28).cgColor)
+            ctx.setLineWidth(26 * s)
+            ctx.addArc(
+                center: source, radius: radius * s,
+                startAngle: towardWrist - 0.22 * .pi,
+                endAngle: towardWrist + 0.22 * .pi,
+                clockwise: false
+            )
+            ctx.strokePath()
+        }
+
+        // Arrow flying in along the wave direction, tip near the hand.
+        let tip = pt(760, 128)
+        let tail = CGPoint(
+            x: tip.x - cos(towardWrist) * 150 * s,
+            y: tip.y - sin(towardWrist) * 150 * s
         )
+        ctx.setStrokeColor(arcCyan.cgColor)
+        ctx.setLineWidth(30 * s)
+        ctx.move(to: tail)
+        ctx.addLine(to: tip)
+        for side in [towardWrist + .pi * 0.8, towardWrist - .pi * 0.8] {
+            ctx.move(to: tip)
+            ctx.addLine(to: CGPoint(
+                x: tip.x + cos(side) * 62 * s,
+                y: tip.y + sin(side) * 62 * s
+            ))
+        }
         ctx.strokePath()
     }
 }
@@ -128,21 +178,32 @@ drawArt(iosCtx, rect: CGRect(x: 0, y: 0, width: size, height: size))
 writePNG(iosCtx.makeImage()!, to: "\(outputDir)/AppIcon-iOS-1024.png")
 
 // macOS: Big Sur-style squircle with margin on transparent canvas.
-let macCtx = makeContext(size)
-let squircle = CGRect(x: 100, y: 100, width: 824, height: 824)
-fillBackground(macCtx, rect: squircle, rounded: 185)
-// Soft shadow under the squircle for the traditional mac look.
-macCtx.saveGState()
-macCtx.setShadow(offset: CGSize(width: 0, height: -10), blur: 24,
-                 color: NSColor.black.withAlphaComponent(0.35).cgColor)
-macCtx.setFillColor(bgBottom.cgColor)
-macCtx.addPath(CGPath(roundedRect: squircle, cornerWidth: 185, cornerHeight: 185, transform: nil))
-macCtx.fillPath()
-macCtx.restoreGState()
-fillBackground(macCtx, rect: squircle, rounded: 185)
-macCtx.saveGState()
-macCtx.addPath(CGPath(roundedRect: squircle, cornerWidth: 185, cornerHeight: 185, transform: nil))
-macCtx.clip()
-drawArt(macCtx, rect: squircle.insetBy(dx: 30, dy: 30))
-macCtx.restoreGState()
-writePNG(macCtx.makeImage()!, to: "\(outputDir)/AppIcon-macOS-1024.png")
+func renderMacIcon(filename: String) {
+    let macCtx = makeContext(size)
+    let squircle = CGRect(x: 100, y: 100, width: 824, height: 824)
+    // Soft shadow under the squircle for the traditional mac look.
+    macCtx.saveGState()
+    macCtx.setShadow(offset: CGSize(width: 0, height: -10), blur: 24,
+                     color: NSColor.black.withAlphaComponent(0.35).cgColor)
+    macCtx.setFillColor(bgBottom.cgColor)
+    macCtx.addPath(CGPath(roundedRect: squircle, cornerWidth: 185, cornerHeight: 185, transform: nil))
+    macCtx.fillPath()
+    macCtx.restoreGState()
+    fillBackground(macCtx, rect: squircle, rounded: 185)
+    macCtx.saveGState()
+    macCtx.addPath(CGPath(roundedRect: squircle, cornerWidth: 185, cornerHeight: 185, transform: nil))
+    macCtx.clip()
+    drawArt(macCtx, rect: squircle.insetBy(dx: 30, dy: 30))
+    macCtx.restoreGState()
+    writePNG(macCtx.makeImage()!, to: "\(outputDir)/\(filename)")
+}
+
+// Receiver icon: blue background, INBOUND waves + arrow.
+artMode = .receiving
+renderMacIcon(filename: "AppIcon-macOS-1024.png")
+
+// Mac sender icon: plum background, outbound waves.
+artMode = .sending
+bgTop = senderBgTop
+bgBottom = senderBgBottom
+renderMacIcon(filename: "AppIcon-macOS-sender-1024.png")
