@@ -1,9 +1,9 @@
 # TrackOSC
 
-A Swift app for iOS that outputs (almost) all Apple Vision framework detection
-results via OSC — body poses, hand poses, face landmarks, text, and animals —
-plus a macOS receiver app that visualizes the incoming data, so you can point
-your iPhone at the world and watch the tracking arrive on your Mac.
+Live camera → Apple Vision tracking → OSC. TrackOSC streams (almost) all of
+Apple's Vision framework detection results — body poses, hand poses, face
+landmarks, text, and animals — over the network as OSC messages, from an
+iPhone or a Mac, and visualizes them in a companion receiver app.
 
 TrackOSC (formerly Poseiosc) is a native-Swift successor to
 [VisionOSC](https://github.com/LingDong-/VisionOSC) by LingDong-
@@ -11,15 +11,23 @@ TrackOSC (formerly Poseiosc) is a native-Swift successor to
 speaks **exactly the same OSC wire format**, so existing VisionOSC/PoseOSC
 receivers (Processing, TouchDesigner, Max/MSP, openFrameworks…) work unchanged.
 
+Three apps:
+
 - **TrackOSC** for iOS (iOS 18+, SwiftUI): live camera → Vision → OSC over UDP,
   with on-screen tracking overlays, per-detector toggles, front/back camera
-  switch, and Bonjour discovery of receivers.
+  switch, portrait/landscape support with an orientation lock for mounted
+  rigs, and Bonjour discovery of receivers.
+- **TrackOSC Sender** (macOS 15+, SwiftUI): the same tracking pipeline running
+  on a Mac camera — built-in, external webcam, or an iPhone via Continuity
+  Camera — with a camera picker and a rig-rotation setting for cameras
+  mounted sideways.
 - **TrackOSC Receiver** (macOS 15+, SwiftUI): listens on UDP (default port
-  9527), draws skeletons/landmarks/boxes, shows per-address message rates and
-  a log, and advertises itself on the local network so the phone can find it.
+  9527), draws skeletons/landmarks/boxes with coordinate guides, shows
+  per-address message rates and a log, and advertises itself on the local
+  network so senders can find it.
 
-Not on the App Store — you build it yourself with a free or paid Apple
-developer account.
+The Mac apps are downloadable, notarized builds; the iOS app is distributed
+via TestFlight or built from source with your own developer account.
 
 ## Quick start without building anything
 
@@ -41,14 +49,14 @@ All downloads are signed and notarized — no Gatekeeper hoops.
 
 Everything below is only needed if you want to build from source.
 
-## Requirements
+## Requirements (building from source)
 
 - Xcode 16 or newer (with the iOS 18 and macOS 15 SDKs)
-- An iPhone running iOS 18 or newer
 - A Mac running macOS 15 (Sequoia) or newer
+- For the iOS sender: an iPhone running iOS 18 or newer
 - An [Apple developer account](https://developer.apple.com) (the free tier works)
-- iPhone and Mac on the same Wi-Fi network (guest/hotel networks often block
-  device-to-device traffic — see Troubleshooting)
+- Sender and receiver devices on the same Wi-Fi network (guest/hotel networks
+  often block device-to-device traffic — see Troubleshooting)
 
 All dependencies are Swift Packages resolved automatically by Xcode
 ([swift-osc](https://swiftpackageindex.com/orchetect/swift-osc) and the local
@@ -67,6 +75,15 @@ All dependencies are Swift Packages resolved automatically by Xcode
 
 The toolbar shows the listening port (default **9527**) and the Bonjour name
 it's advertising. You can change the port and press **Restart**.
+
+## Building the macOS sender
+
+Same as the receiver, with the **TrackOSCSenderMac** scheme. First launch
+asks for **Camera** and **Local Network** permission — both are needed. In
+its settings (gear icon): pick a camera (external webcams and iPhones via
+Continuity Camera appear automatically), set **Rig rotation** if the camera
+is mounted sideways, and choose a destination — discovered receivers are one
+click. Send to `127.0.0.1` to feed a receiver on the same Mac.
 
 ## Building the iOS sender
 
@@ -92,40 +109,43 @@ it's advertising. You can change the port and press **Restart**.
 
 ## Using it
 
-1. Start the receiver on the Mac.
-2. Start the sender on the iPhone. Tap the gear icon — your Mac should appear
-   under **Discovered receivers** within a second or two; tap it. (Or type the
-   Mac's IP and port manually — the sender can also target TouchDesigner,
-   Max/MSP, Processing, etc. on any port.)
-3. Point the camera at a person: a skeleton appears on the phone overlay and,
-   mirrored live, on the Mac's canvas.
+1. Start the receiver on a Mac.
+2. Start a sender (iPhone or Mac). In its settings (gear icon), the receiver
+   should appear under **Discovered receivers** within a second or two — tap
+   it. (Or type an IP and port manually — senders can also target
+   TouchDesigner, Max/MSP, Processing, etc. on any port.)
+3. Point the camera at a person: a skeleton appears on the sender's overlay
+   and, live, on the receiver's canvas.
 4. Toggle detectors with the chips along the bottom (Body / Hand / Face /
    Text / Animal). More detectors = lower frame rate; body+hand+face is the
-   comfortable default. The status capsule shows destination and processed fps.
-5. In selfie mode the phone screen shows a mirror image (like the Camera app)
-   so it feels natural — but the OSC coordinates sent to receivers are
-   **always unmirrored**, matching VisionOSC. Turn the mirror off in
-   Settings → Preview if you want the screen to match the receiver exactly.
+   comfortable default. The status capsule shows destination, transmitted
+   frame size, and processed fps.
+5. Selfie-style previews are mirrored by default (like the Camera app) so
+   they feel natural — but the OSC coordinates sent to receivers are
+   **always unmirrored**, matching VisionOSC. Turn the mirror off in the
+   sender's settings if you want the screen to match the receiver exactly.
 
 ### Camera orientation
 
-The sender works in portrait **and landscape**. Tracking quality is best when
-the declared orientation matches how the camera is actually held, because
-Vision then analyzes unrotated frames.
+Tracking quality is best when the declared orientation matches how the
+camera is actually held, because Vision then analyzes unrotated frames.
 
-- **Auto (default)**: follows the device as you rotate it; the transmitted
-  frame dimensions swap accordingly (e.g. 720×1280 ↔ 1280×720).
-- **Portrait / Landscape Left / Landscape Right** (Settings → Camera): locks
-  the assumed orientation. Use this when the phone is **mounted** — on a
-  tripod, clamped sideways, or lying flat — because automatic detection
-  relies on gravity and fails when the phone is flat. If a locked landscape
+- **iPhone — Auto (default)**: follows the device as you rotate it between
+  portrait and landscape; the transmitted frame dimensions swap accordingly
+  (e.g. 720×1280 ↔ 1280×720).
+- **iPhone — Portrait / Landscape Left / Landscape Right** (Settings →
+  Camera): locks the assumed orientation. Use this when the phone is
+  **mounted** — on a tripod, clamped sideways, or lying flat — because
+  automatic detection fails when the phone is flat. If a locked landscape
   preview appears upside down, pick the other landscape option.
+- **Mac — Rig rotation** (0°/90°/180°/270°): Mac cameras don't rotate on
+  their own, so declare how the camera is physically mounted instead.
 
 The current orientation and dimensions are always broadcast in the
 `/camerainfo` OSC message and shown in the sender's status capsule and the
 receiver's canvas.
 
-### Testing without an iPhone
+### Testing without a camera
 
 The shared package includes two CLI tools (run from `PoseioscShared/`):
 
@@ -314,7 +334,7 @@ contract. Run tests with `cd PoseioscShared && swift test`.
 
 ## Troubleshooting
 
-- **Receiver never appears on the phone** — both devices on the same Wi-Fi?
+- **Receiver never appears in a sender's list** — both devices on the same Wi-Fi?
   Many guest/campus/hotel networks enable *client isolation*, which blocks
   device-to-device traffic entirely; use a private network or a personal
   hotspot. Check Local Network permission on **both** devices, and that the
